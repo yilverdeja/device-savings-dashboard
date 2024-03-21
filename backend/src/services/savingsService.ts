@@ -11,42 +11,64 @@ const dataService = DataService.getInstance();
 
 class SavingsService {
 	async getSavingsData(deviceId: number): Promise<TotalSavingsData> {
-		const cachedTotalCarbonKey = `totalCarbon-${deviceId}`;
-		const cachedTotalDieselKey = `totalDiesel-${deviceId}`;
+		try {
+			const cachedTotalCarbonKey = `totalCarbon-${deviceId}`;
+			const cachedTotalDieselKey = `totalDiesel-${deviceId}`;
 
-		let carbon: number | null = await cacheManager.get<number | null>(
-			cachedTotalCarbonKey
-		);
-		let diesel: number | null = await cacheManager.get<number | null>(
-			cachedTotalDieselKey
-		);
+			let carbon: number | null = await cacheManager.get<number | null>(
+				cachedTotalCarbonKey
+			);
+			let diesel: number | null = await cacheManager.get<number | null>(
+				cachedTotalDieselKey
+			);
 
-		if (!(carbon && diesel)) {
-			const total: TotalSavingsData = this.calculateTotalSaved(deviceId);
-			carbon = total.carbon;
-			diesel = total.diesel;
+			if (!(carbon && diesel)) {
+				const total: TotalSavingsData =
+					this.calculateTotalSaved(deviceId);
+				carbon = total.carbon;
+				diesel = total.diesel;
 
-			await Promise.all([
-				cacheManager.set(cachedTotalCarbonKey, carbon, 60 * 60 * 1000),
-				cacheManager.set(cachedTotalDieselKey, diesel, 60 * 60 * 1000),
-			]);
+				await Promise.all([
+					cacheManager.set(
+						cachedTotalCarbonKey,
+						carbon,
+						60 * 60 * 1000
+					),
+					cacheManager.set(
+						cachedTotalDieselKey,
+						diesel,
+						60 * 60 * 1000
+					),
+				]);
+			}
+
+			return { carbon, diesel };
+		} catch (error) {
+			// Handle errors appropriately
+			console.error('Failed to get savings data:', error);
+			throw new Error('Unable to retrieve savings data.');
 		}
-
-		return { carbon, diesel };
 	}
 
 	private calculateTotalSaved(deviceId: number) {
-		const deviceSaving = dataService
-			.getDeviceSavings()
-			.filter((ds) => ds.device_id === deviceId);
-		const carbon = deviceSaving.reduce(
+		const deviceSavings = dataService.getDeviceSavings() || [];
+
+		deviceSavings.filter((ds) => ds.device_id === deviceId);
+
+		if (!deviceSavings.length) {
+			// Handle the case where no savings data is found for the device
+			throw new Error(`No savings data found for device ID ${deviceId}`);
+		}
+
+		const carbon = deviceSavings.reduce(
 			(acc, ds) => acc + ds.carbon_saved,
 			0
 		);
-		const diesel = deviceSaving.reduce(
+		const diesel = deviceSavings.reduce(
 			(acc, ds) => acc + ds.fueld_saved,
 			0
 		);
+
 		return { carbon, diesel };
 	}
 }

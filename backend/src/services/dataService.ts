@@ -13,8 +13,8 @@ const deviceSavingsFilePath = path.join(
 
 export class DataService {
 	private static instance: DataService;
-	private devices: Device[] = [];
-	private deviceSavings: DeviceSaving[] = [];
+	private devices: Device[] | null = null;
+	private deviceSavings: DeviceSaving[] | null = null;
 
 	private constructor() {
 		this.loadCSVData();

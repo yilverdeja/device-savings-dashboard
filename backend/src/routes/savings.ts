@@ -23,7 +23,8 @@ router.get('/savings/:deviceId', async (req, res) => {
 				: new Date(startDate as string);
 		const end = endDate === undefined ? today : new Date(endDate as string);
 
-		const filteredData = dataService.getDeviceSavings().filter((saving) => {
+		const deviceSavings = dataService.getDeviceSavings() || [];
+		const filteredData = deviceSavings.filter((saving) => {
 			const savingTimestamp = new Date(saving.timestamp);
 			return (
 				saving.device_id === parseInt(deviceId) &&
