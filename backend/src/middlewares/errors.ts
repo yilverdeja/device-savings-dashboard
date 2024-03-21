@@ -13,6 +13,7 @@ export const errorHandler = (
 		statusCode: err.statusCode || 500,
 		error: err.error || 'Internal Server Error',
 		message: err.message || 'An unexpected error occurred.',
+		details: err.details || undefined,
 	};
 
 	res.status(errorResponse.statusCode).json(errorResponse);

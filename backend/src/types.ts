@@ -18,10 +18,12 @@ export interface DevicesRequest {
 	includeSavings?: boolean;
 }
 
+export type DeviceSavingsResolution = 'month' | 'week' | 'day';
+
 export interface DeviceSavingsRequest {
 	from?: Date;
 	to?: Date;
-	resolution?: 'month' | 'week' | 'day';
+	resolution?: DeviceSavingsResolution;
 }
 
 // Response types

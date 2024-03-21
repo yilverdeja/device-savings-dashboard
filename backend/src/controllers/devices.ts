@@ -3,6 +3,7 @@ import { DataService } from '../services/dataService';
 import { Device, DevicesRequest, DevicesResponse } from '../types';
 import { NextFunction, Request, Response } from 'express';
 import { CustomError } from '../utils/customError';
+import { validationResult } from 'express-validator';
 
 export type DeviceWithTotalSavings = Device & TotalSavingsData;
 
@@ -13,6 +14,17 @@ const devicesRetrievalController =
 		res: Response<DevicesResponse>,
 		next: NextFunction
 	) => {
+		const validationErrors = validationResult(req);
+		if (!validationErrors.isEmpty()) {
+			return next(
+				new CustomError(
+					400,
+					'The query was invalid',
+					'Validation Error',
+					validationErrors.array()
+				)
+			);
+		}
 		const devices = dataService.getDevices();
 		if (!devices) {
 			return next(
@@ -23,7 +35,7 @@ const devicesRetrievalController =
 				)
 			);
 		}
-		const { includeSavings } = req.query;
+		const { includeSavings = false } = req.query;
 		if (includeSavings) {
 			try {
 				const deviceWithSavings: DeviceWithTotalSavings[] =

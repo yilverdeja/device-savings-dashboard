@@ -2,8 +2,9 @@ import { NextFunction, Request, Response } from 'express';
 import { savingsService } from '../services/savingsService';
 import { DataService } from '../services/dataService';
 import getDateChunks from '../utils/dateChunks';
-import { DeviceSavingsResponse } from '../types';
+import { DeviceSavingsResolution, DeviceSavingsResponse } from '../types';
 import { CustomError } from '../utils/customError';
+import { validationResult } from 'express-validator';
 
 const deviceSavingsRetrievalController =
 	(dataService: DataService) =>
@@ -12,38 +13,53 @@ const deviceSavingsRetrievalController =
 		res: Response<DeviceSavingsResponse>,
 		next: NextFunction
 	) => {
+		const validationErrors = validationResult(req);
+		if (!validationErrors.isEmpty()) {
+			return next(
+				new CustomError(
+					400,
+					'The query and/or params were invalid',
+					'Validation Error',
+					validationErrors.array()
+				)
+			);
+		}
+
+		// convert deviceId into an integer
 		const { deviceId } = req.params;
-		const { startDate, endDate, resolution } = req.query;
+		const id = parseInt(deviceId);
 
-		const today = new Date('2023-06-01');
-		const from =
-			startDate === undefined
-				? new Date(today.setDate(today.getDate() - 30))
-				: new Date(startDate as string);
-		const to = endDate === undefined ? today : new Date(endDate as string);
+		// convert from and to to valid dates, and resolution to correct type
+		const { from, to, resolution } = req.query;
+		const currentDate = new Date();
+		const defaultToDate = currentDate;
 
-		// make sure resolution is valid
-		const reso: 'month' | 'week' | 'day' =
-			resolution === 'month'
-				? 'month'
-				: resolution === 'week'
-				? 'week'
-				: resolution === 'day'
-				? 'day'
-				: 'month';
+		// defaults to current date
+		const toDate =
+			to === undefined ? defaultToDate : new Date(to as string);
+
+		// defaults to 30 days before toDate
+		const fromDate =
+			from === undefined
+				? new Date(toDate.setDate(toDate.getDate() - 30))
+				: new Date(from as string);
+
+		// casts to the right type
+		const resolutionType: DeviceSavingsResolution =
+			resolution as DeviceSavingsResolution;
 
 		// create chunks based on resolution
-		const dateChunks = getDateChunks(from, to, reso);
+		const dateChunks = getDateChunks(fromDate, toDate, resolutionType);
 
 		try {
 			// try to get the cached device data
 			const { totalCarbon: carbon, totalDiesel: diesel } =
-				await savingsService.getSavingsData(parseInt(deviceId));
+				await savingsService.getSavingsData(id);
 
 			// get total energy savings per chunk range
 			const data = dateChunks.map((chunk) => {
 				const chunkTotal = savingsService.calculateTotalSavedInRange(
-					parseInt(deviceId),
+					id,
 					chunk.start,
 					chunk.end
 				);
@@ -56,7 +72,7 @@ const deviceSavingsRetrievalController =
 			});
 
 			res.json({
-				device_id: parseInt(deviceId),
+				device_id: id,
 				totalCarbon: carbon,
 				totalDiesel: diesel,
 				savingsChunks: data,
