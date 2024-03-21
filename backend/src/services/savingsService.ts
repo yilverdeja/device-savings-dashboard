@@ -80,24 +80,6 @@ class SavingsService {
 		// filter by deviceId
 		deviceSavings = deviceSavings.filter((ds) => ds.device_id === deviceId);
 
-		// get the min and max timestamp
-		// deviceSavings.reduce((dateMinMax, ds) => {
-		// 	return {
-		// 		"min": Math.min(dateMinMax["min"], ds.timestamp)
-		// 	}
-		// }, {})
-		const minDeviceDate = new Date(
-			Math.min(...deviceSavings.map((ds) => ds.timestamp.getTime()))
-		);
-		const maxDeviceDate = new Date(
-			Math.max(...deviceSavings.map((ds) => ds.timestamp.getTime()))
-		);
-
-		const averageCarbon = 1;
-		const averageDiesel = 2;
-
-		console.log(minDeviceDate, maxDeviceDate);
-
 		if (!deviceSavings.length) {
 			// Handle the case where no savings data is found for the device
 			throw new Error(`No savings data found for device ID ${deviceId}`);
@@ -111,6 +93,29 @@ class SavingsService {
 			(acc, ds) => acc + ds.fueld_saved,
 			0
 		);
+
+		// get the minimum and maximum dates in the deviceSavings
+		const minDeviceDate = new Date(
+			Math.min(...deviceSavings.map((ds) => ds.timestamp.getTime()))
+		);
+		const maxDeviceDate = new Date(
+			Math.max(...deviceSavings.map((ds) => ds.timestamp.getTime()))
+		);
+
+		// calculate the number of days between the min and max dates
+		const daysBetweenMinMaxDates = Math.ceil(
+			Math.abs(maxDeviceDate.getTime() - minDeviceDate.getTime()) /
+				(24 * 60 * 60 * 1000)
+		); // milliseconds representation of 1 day
+
+		// assumption that a month averages at 30 days
+		const daysInAMonth = 30;
+
+		// calculate the total monthly average based on the min and max dates
+		const averageCarbon =
+			(totalCarbon / daysBetweenMinMaxDates) * daysInAMonth;
+		const averageDiesel =
+			(totalDiesel / daysBetweenMinMaxDates) * daysInAMonth;
 
 		return { totalCarbon, totalDiesel, averageCarbon, averageDiesel };
 	}
