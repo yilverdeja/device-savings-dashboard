@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { CustomError } from '../utils/customError';
 
 let isDataLoaded = false;
 
@@ -9,9 +10,13 @@ export function setDataLoaded(loaded: boolean) {
 // middleware to check if the data has been loaded into the server
 const checkDataLoaded = (req: Request, res: Response, next: NextFunction) => {
 	if (!isDataLoaded) {
-		return res
-			.status(503)
-			.send('Service Unavailable - Data is still loading');
+		return next(
+			new CustomError(
+				503,
+				'Data has not yet finished loading into the server',
+				'Service Unavailable'
+			)
+		);
 	}
 	next();
 };

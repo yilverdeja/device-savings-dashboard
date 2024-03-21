@@ -1,15 +1,27 @@
 import { TotalSavingsData, savingsService } from './../services/savingsService';
 import { DataService } from '../services/dataService';
-import { Device } from '../types';
-import { Request, Response } from 'express';
+import { Device, DevicesRequest, DevicesResponse } from '../types';
+import { NextFunction, Request, Response } from 'express';
+import { CustomError } from '../utils/customError';
 
 export type DeviceWithTotalSavings = Device & TotalSavingsData;
 
 const devicesRetrievalController =
-	(dataService: DataService) => async (req: Request, res: Response) => {
+	(dataService: DataService) =>
+	async (
+		req: Request,
+		res: Response<DevicesResponse>,
+		next: NextFunction
+	) => {
 		const devices = dataService.getDevices();
 		if (!devices) {
-			return res.status(503).send('Data is not loaded yet');
+			return next(
+				new CustomError(
+					503,
+					'Device data has not yet loaded in the server',
+					'Service Unavailable'
+				)
+			);
 		}
 		const { includeSavings } = req.query;
 		if (includeSavings) {
@@ -26,15 +38,20 @@ const devicesRetrievalController =
 							}
 						)
 					);
-				res.json(deviceWithSavings);
-			} catch (error) {
-				res.status(500).json({
-					message: 'Error fetching devices with device saving data',
-					error,
+				res.json({
+					devices: deviceWithSavings,
 				});
+			} catch (error) {
+				next(
+					new CustomError(
+						500,
+						'Error fetching devices with device saving data',
+						'Internal Server Error'
+					)
+				);
 			}
 		} else {
-			res.json(devices);
+			res.json({ devices });
 		}
 	};
 

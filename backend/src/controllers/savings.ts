@@ -1,19 +1,26 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { savingsService } from '../services/savingsService';
 import { DataService } from '../services/dataService';
 import getDateChunks from '../utils/dateChunks';
+import { DeviceSavingsResponse } from '../types';
+import { CustomError } from '../utils/customError';
 
 const deviceSavingsRetrievalController =
-	(dataService: DataService) => async (req: Request, res: Response) => {
+	(dataService: DataService) =>
+	async (
+		req: Request,
+		res: Response<DeviceSavingsResponse>,
+		next: NextFunction
+	) => {
 		const { deviceId } = req.params;
 		const { startDate, endDate, resolution } = req.query;
 
 		const today = new Date('2023-06-01');
-		const start =
+		const from =
 			startDate === undefined
 				? new Date(today.setDate(today.getDate() - 30))
 				: new Date(startDate as string);
-		const end = endDate === undefined ? today : new Date(endDate as string);
+		const to = endDate === undefined ? today : new Date(endDate as string);
 
 		// make sure resolution is valid
 		const reso: 'month' | 'week' | 'day' =
@@ -26,7 +33,7 @@ const deviceSavingsRetrievalController =
 				: 'month';
 
 		// create chunks based on resolution
-		const dateChunks = getDateChunks(start, end, reso);
+		const dateChunks = getDateChunks(from, to, reso);
 
 		try {
 			// try to get the cached device data
@@ -41,23 +48,27 @@ const deviceSavingsRetrievalController =
 					chunk.end
 				);
 				return {
-					start: chunk.start,
-					end: chunk.end,
+					from: chunk.start,
+					to: chunk.end,
 					totalCarbon: chunkTotal.totalCarbon,
 					totalDiesel: chunkTotal.totalDiesel,
 				};
 			});
 
 			res.json({
+				device_id: parseInt(deviceId),
 				totalCarbon: carbon,
 				totalDiesel: diesel,
-				savingsData: data,
+				savingsChunks: data,
 			});
 		} catch (error) {
-			res.status(500).json({
-				message: 'Error fetching device savings data',
-				error,
-			});
+			next(
+				new CustomError(
+					500,
+					'Error fetching device savings data',
+					'Internal Server Error'
+				)
+			);
 		}
 	};
 

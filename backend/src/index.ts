@@ -4,6 +4,7 @@ import checkDataLoaded from './middlewares/checkDataLoaded';
 import { DataService } from './services/dataService';
 import deviceRouter from './routes/devices';
 import savingsRouter from './routes/savings';
+import { errorHandler } from './middlewares/errors';
 
 // create an express app
 const app = express();
@@ -17,6 +18,7 @@ const startServer = async () => {
 		await DataService.getInstance();
 		app.use('/', deviceRouter);
 		app.use('/', savingsRouter);
+		app.use(errorHandler);
 		app.listen(port, () => {
 			console.log(`Server running on http://localhost:${port}`);
 		});
