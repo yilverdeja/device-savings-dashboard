@@ -137,7 +137,29 @@ class SavingsService {
 		deviceId: number,
 		start: Date,
 		end: Date
-	) {}
+	) {
+		let deviceSavings = dataService.getDeviceSavings() || [];
+
+		// filter by deviceId
+		deviceSavings = deviceSavings.filter((ds) => {
+			return (
+				ds.device_id === deviceId &&
+				ds.timestamp >= start &&
+				ds.timestamp <= end
+			);
+		});
+
+		if (!deviceSavings.length) {
+			// Handle the case where no savings data is found for the device
+			throw new Error(`No savings data found for device ID ${deviceId}`);
+		}
+
+		// calculates the total carbon and diesel saved from the deviceSavings data provided
+		const { totalCarbon, totalDiesel } =
+			this.calculateTotalCarbonDieselSaved(deviceSavings);
+
+		return { totalCarbon, totalDiesel };
+	}
 }
 
 export const savingsService = new SavingsService();
