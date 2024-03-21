@@ -13,61 +13,65 @@ const mockDevices: Device[] = [
 	{ id: 4, name: 'ulterius', timezone: 'Africa/Cairo' },
 ];
 
+// 30 days so the average monthly will become equal to the total in that month
+const recordStartDate = new Date('2023-01-01T00:00:00.000Z');
+const recordEndDate = new Date('2023-01-30T00:00:00.000Z');
+
 // Mock savings data based on the CSV file
 const mockSavings: DeviceSaving[] = [
 	{
 		device_id: 1,
-		timestamp: new Date(),
-		device_timestamp: new Date(),
+		timestamp: recordStartDate,
+		device_timestamp: recordStartDate,
 		carbon_saved: 1,
 		fueld_saved: 2,
 	},
 	{
 		device_id: 1,
-		timestamp: new Date(),
-		device_timestamp: new Date(),
+		timestamp: recordEndDate,
+		device_timestamp: recordEndDate,
 		carbon_saved: 10,
 		fueld_saved: 10,
 	},
 	{
 		device_id: 2,
-		timestamp: new Date(),
-		device_timestamp: new Date(),
+		timestamp: recordStartDate,
+		device_timestamp: recordStartDate,
 		carbon_saved: 3,
 		fueld_saved: 4,
 	},
 	{
 		device_id: 2,
-		timestamp: new Date(),
-		device_timestamp: new Date(),
+		timestamp: recordEndDate,
+		device_timestamp: recordEndDate,
 		carbon_saved: 10,
 		fueld_saved: 10,
 	},
 	{
 		device_id: 3,
-		timestamp: new Date(),
-		device_timestamp: new Date(),
+		timestamp: recordStartDate,
+		device_timestamp: recordStartDate,
 		carbon_saved: 5,
 		fueld_saved: 6,
 	},
 	{
 		device_id: 3,
-		timestamp: new Date(),
-		device_timestamp: new Date(),
+		timestamp: recordEndDate,
+		device_timestamp: recordEndDate,
 		carbon_saved: 10,
 		fueld_saved: 10,
 	},
 	{
 		device_id: 4,
-		timestamp: new Date(),
-		device_timestamp: new Date(),
+		timestamp: recordStartDate,
+		device_timestamp: recordStartDate,
 		carbon_saved: 7,
 		fueld_saved: 8,
 	},
 	{
 		device_id: 4,
-		timestamp: new Date(),
-		device_timestamp: new Date(),
+		timestamp: recordEndDate,
+		device_timestamp: recordEndDate,
 		carbon_saved: 10,
 		fueld_saved: 10,
 	},
@@ -79,29 +83,37 @@ const mockDevicesWithSavings: DeviceWithTotalSavings[] = [
 		id: 1,
 		name: 'advenio',
 		timezone: 'Pacific/Chuuk',
-		carbon: 11,
-		diesel: 12,
+		totalCarbon: 11,
+		totalDiesel: 12,
+		averageCarbon: 11,
+		averageDiesel: 12,
 	},
 	{
 		id: 2,
 		name: 'approbo',
 		timezone: 'America/Mexico_City',
-		carbon: 13,
-		diesel: 14,
+		totalCarbon: 13,
+		totalDiesel: 14,
+		averageCarbon: 13,
+		averageDiesel: 14,
 	},
 	{
 		id: 3,
 		name: 'ventito',
 		timezone: 'America/North_Dakota/Beulah',
-		carbon: 15,
-		diesel: 16,
+		totalCarbon: 15,
+		totalDiesel: 16,
+		averageCarbon: 15,
+		averageDiesel: 16,
 	},
 	{
 		id: 4,
 		name: 'ulterius',
 		timezone: 'Africa/Cairo',
-		carbon: 17,
-		diesel: 18,
+		totalCarbon: 17,
+		totalDiesel: 18,
+		averageCarbon: 17,
+		averageDiesel: 18,
 	},
 ];
 
@@ -154,13 +166,17 @@ describe('devicesRetrievalController', () => {
 
 	it('should retrieve devices with savings', async () => {
 		const mockGetSavingsData = vi.fn((deviceId) => {
+			const totalCarbon = mockSavings
+				.filter((ms) => ms.device_id === deviceId)
+				.reduce((sum, ms) => sum + ms.carbon_saved, 0);
+			const totalDiesel = mockSavings
+				.filter((ms) => ms.device_id === deviceId)
+				.reduce((sum, ms) => sum + ms.fueld_saved, 0);
 			return Promise.resolve({
-				carbon: mockSavings
-					.filter((ms) => ms.device_id === deviceId)
-					.reduce((sum, ms) => sum + ms.carbon_saved, 0),
-				diesel: mockSavings
-					.filter((ms) => ms.device_id === deviceId)
-					.reduce((sum, ms) => sum + ms.fueld_saved, 0),
+				totalCarbon: totalCarbon,
+				totalDiesel: totalDiesel,
+				averageCarbon: totalCarbon,
+				averageDiesel: totalDiesel,
 			});
 		});
 
@@ -206,8 +222,8 @@ describe('devicesRetrievalController', () => {
 						'id' in device &&
 						'name' in device &&
 						'timezone' in device &&
-						'carbon' in device &&
-						'diesel' in device
+						'totalCarbon' in device &&
+						'totalDiesel' in device
 				)
 			).toBe(true);
 
