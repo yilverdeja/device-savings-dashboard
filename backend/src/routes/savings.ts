@@ -9,11 +9,14 @@ router.get('/savings/:deviceId', async (req, res) => {
 	const { deviceId } = req.params;
 	const { startDate, endDate, resolution } = req.query;
 
+	// calculate average total (monthly)
+	// resolution is a string set to year, month, week, day
+	// add pagination
+
 	try {
 		// try to get the cached device data
-		const { carbon, diesel } = await savingsService.getSavingsData(
-			parseInt(deviceId)
-		);
+		const { totalCarbon: carbon, totalDiesel: diesel } =
+			await savingsService.getSavingsData(parseInt(deviceId));
 
 		// filter the data based on the query
 		const today = new Date('2023-06-01');

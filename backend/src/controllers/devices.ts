@@ -1,12 +1,7 @@
-import { savingsService } from './../services/savingsService';
+import { TotalSavingsData, savingsService } from './../services/savingsService';
 import { DataService } from '../services/dataService';
 import { Device } from '../types';
 import { Request, Response } from 'express';
-
-export type TotalSavingsData = {
-	carbon: number;
-	diesel: number;
-};
 
 export type DeviceWithTotalSavings = Device & TotalSavingsData;
 

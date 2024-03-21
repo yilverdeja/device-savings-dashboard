@@ -2,9 +2,11 @@ import cacheManager from './cacheManager';
 import { DataService } from './dataService';
 
 // types
-type TotalSavingsData = {
-	carbon: number;
-	diesel: number;
+export type TotalSavingsData = {
+	totalCarbon: number;
+	totalDiesel: number;
+	averageCarbon: number;
+	averageDiesel: number;
 };
 
 const dataService = DataService.getInstance();
@@ -14,35 +16,57 @@ class SavingsService {
 		try {
 			const cachedTotalCarbonKey = `totalCarbon-${deviceId}`;
 			const cachedTotalDieselKey = `totalDiesel-${deviceId}`;
+			const cachedMonthAverageCarbonKey = `totalCarbon-${deviceId}`;
+			const cachedMonthAverageDieselKey = `totalDiesel-${deviceId}`;
 
-			let carbon: number | null = await cacheManager.get<number | null>(
-				cachedTotalCarbonKey
-			);
-			let diesel: number | null = await cacheManager.get<number | null>(
-				cachedTotalDieselKey
-			);
+			let totalCarbon: number | null = await cacheManager.get<
+				number | null
+			>(cachedTotalCarbonKey);
+			let totalDiesel: number | null = await cacheManager.get<
+				number | null
+			>(cachedTotalDieselKey);
+			let averageCarbon: number | null = await cacheManager.get<
+				number | null
+			>(cachedMonthAverageCarbonKey);
+			let averageDiesel: number | null = await cacheManager.get<
+				number | null
+			>(cachedMonthAverageDieselKey);
 
-			if (!(carbon && diesel)) {
+			if (
+				!(totalCarbon && totalDiesel && averageCarbon && averageDiesel)
+			) {
 				const total: TotalSavingsData =
 					this.calculateTotalSaved(deviceId);
-				carbon = total.carbon;
-				diesel = total.diesel;
+				totalCarbon = total.totalCarbon;
+				totalDiesel = total.totalDiesel;
+				averageCarbon = total.averageCarbon;
+				averageDiesel = total.averageDiesel;
 
 				await Promise.all([
 					cacheManager.set(
 						cachedTotalCarbonKey,
-						carbon,
+						totalCarbon,
 						60 * 60 * 1000
 					),
 					cacheManager.set(
 						cachedTotalDieselKey,
-						diesel,
+						totalDiesel,
+						60 * 60 * 1000
+					),
+					cacheManager.set(
+						cachedMonthAverageCarbonKey,
+						averageCarbon,
+						60 * 60 * 1000
+					),
+					cacheManager.set(
+						cachedMonthAverageDieselKey,
+						averageDiesel,
 						60 * 60 * 1000
 					),
 				]);
 			}
 
-			return { carbon, diesel };
+			return { totalCarbon, totalDiesel, averageCarbon, averageDiesel };
 		} catch (error) {
 			// Handle errors appropriately
 			console.error('Failed to get savings data:', error);
@@ -50,26 +74,45 @@ class SavingsService {
 		}
 	}
 
-	private calculateTotalSaved(deviceId: number) {
-		const deviceSavings = dataService.getDeviceSavings() || [];
+	private calculateTotalSaved(deviceId: number): TotalSavingsData {
+		let deviceSavings = dataService.getDeviceSavings() || [];
 
-		deviceSavings.filter((ds) => ds.device_id === deviceId);
+		// filter by deviceId
+		deviceSavings = deviceSavings.filter((ds) => ds.device_id === deviceId);
+
+		// get the min and max timestamp
+		// deviceSavings.reduce((dateMinMax, ds) => {
+		// 	return {
+		// 		"min": Math.min(dateMinMax["min"], ds.timestamp)
+		// 	}
+		// }, {})
+		const minDeviceDate = new Date(
+			Math.min(...deviceSavings.map((ds) => ds.timestamp.getTime()))
+		);
+		const maxDeviceDate = new Date(
+			Math.max(...deviceSavings.map((ds) => ds.timestamp.getTime()))
+		);
+
+		const averageCarbon = 1;
+		const averageDiesel = 2;
+
+		console.log(minDeviceDate, maxDeviceDate);
 
 		if (!deviceSavings.length) {
 			// Handle the case where no savings data is found for the device
 			throw new Error(`No savings data found for device ID ${deviceId}`);
 		}
 
-		const carbon = deviceSavings.reduce(
+		const totalCarbon = deviceSavings.reduce(
 			(acc, ds) => acc + ds.carbon_saved,
 			0
 		);
-		const diesel = deviceSavings.reduce(
+		const totalDiesel = deviceSavings.reduce(
 			(acc, ds) => acc + ds.fueld_saved,
 			0
 		);
 
-		return { carbon, diesel };
+		return { totalCarbon, totalDiesel, averageCarbon, averageDiesel };
 	}
 }
 
