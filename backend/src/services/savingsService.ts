@@ -138,6 +138,7 @@ class SavingsService {
 		start: Date,
 		end: Date
 	) {
+		console.log(start, end);
 		let deviceSavings = dataService.getDeviceSavings() || [];
 
 		// filter by deviceId

@@ -94,8 +94,8 @@ describe('dateChunk', () => {
 		expect(dateChunks).toHaveLength(3);
 
 		// first month start should be start, last month end should be end
-		expect(dateChunks[0].start).toEqual(params.start);
-		expect(dateChunks[2].end).toEqual(params.end);
+		expect(dateChunks[0].from).toEqual(params.start);
+		expect(dateChunks[2].to).toEqual(params.end);
 
 		// second month should start and end at the start and end of the month
 		expect(dateChunks[1]).toEqual({
@@ -104,10 +104,10 @@ describe('dateChunk', () => {
 		});
 
 		// first month should end at the end of the month
-		expect(dateChunks[0].end).toEqual(new Date('2023-01-31T23:59:59.999Z'));
+		expect(dateChunks[0].to).toEqual(new Date('2023-01-31T23:59:59.999Z'));
 
 		// last month should start at the start of the month
-		expect(dateChunks[2].start).toEqual(
+		expect(dateChunks[2].from).toEqual(
 			new Date('2023-03-01T00:00:00.000Z')
 		);
 	});
@@ -129,14 +129,14 @@ describe('dateChunk', () => {
 		expect(dateChunks).toHaveLength(4); // Nov, Dec, Jan, Feb
 
 		// November start and end
-		expect(dateChunks[0].start).toEqual(params.start);
-		expect(dateChunks[0].end).toEqual(new Date('2022-11-30T23:59:59.999Z'));
+		expect(dateChunks[0].from).toEqual(params.start);
+		expect(dateChunks[0].to).toEqual(new Date('2022-11-30T23:59:59.999Z'));
 
 		// February start and end
-		expect(dateChunks[3].start).toEqual(
+		expect(dateChunks[3].from).toEqual(
 			new Date('2023-02-01T00:00:00.000Z')
 		);
-		expect(dateChunks[3].end).toEqual(params.end);
+		expect(dateChunks[3].to).toEqual(params.end);
 	});
 
 	it('should return the appropriate chunks with a week resolution', () => {
@@ -157,14 +157,14 @@ describe('dateChunk', () => {
 		expect(dateChunks).toHaveLength(13);
 
 		// start is wednesday
-		expect(dateChunks[0].start.getUTCDay()).toBe(3);
+		expect(dateChunks[0].from.getUTCDay()).toBe(3);
 
 		// end is thursday
-		expect(dateChunks[12].end.getUTCDay()).toBe(6);
+		expect(dateChunks[12].to.getUTCDay()).toBe(6);
 
 		// full week chunks should start from monday and end on sunday
-		expect(dateChunks[1].start.getUTCDay()).toBe(1);
-		expect(dateChunks[1].end.getUTCDay()).toBe(0);
+		expect(dateChunks[1].from.getUTCDay()).toBe(1);
+		expect(dateChunks[1].to.getUTCDay()).toBe(0);
 	});
 
 	it('should return the appropriate chunks given dates in different years with a week resolution', () => {
@@ -206,14 +206,14 @@ describe('dateChunk', () => {
 		expect(dateChunks).toHaveLength(6);
 
 		// start
-		expect(dateChunks[0].start).toEqual(params.start);
-		expect(dateChunks[0].end).toEqual(new Date('2023-02-08T23:59:59.999Z'));
+		expect(dateChunks[0].from).toEqual(params.start);
+		expect(dateChunks[0].to).toEqual(new Date('2023-02-08T23:59:59.999Z'));
 
 		// end
-		expect(dateChunks[5].start).toEqual(
+		expect(dateChunks[5].from).toEqual(
 			new Date('2023-02-13T00:00:00.000Z')
 		);
-		expect(dateChunks[5].end).toEqual(params.end);
+		expect(dateChunks[5].to).toEqual(params.end);
 
 		// mid chunk as full day
 		expect(dateChunks[1]).toEqual({

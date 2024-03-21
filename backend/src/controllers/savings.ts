@@ -2,7 +2,11 @@ import { NextFunction, Request, Response } from 'express';
 import { savingsService } from '../services/savingsService';
 import { DataService } from '../services/dataService';
 import getDateChunks from '../utils/dateChunks';
-import { DeviceSavingsResolution, DeviceSavingsResponse } from '../types';
+import {
+	DeviceSaving,
+	DeviceSavingsResolution,
+	DeviceSavingsResponse,
+} from '../types';
 import { CustomError } from '../utils/customError';
 import { validationResult } from 'express-validator';
 
@@ -49,7 +53,36 @@ const deviceSavingsRetrievalController =
 			resolution as DeviceSavingsResolution;
 
 		// create chunks based on resolution
-		const dateChunks = getDateChunks(fromDate, toDate, resolutionType);
+		let dateChunks = getDateChunks(fromDate, toDate, resolutionType);
+		const deviceSavings = dataService.getDeviceSavings() as DeviceSaving[];
+
+		// TODO: Move dataChunks filtering somewhere else
+		// get the minimum and maximum dates in the deviceSavings
+		const minDeviceDate = new Date(
+			Math.min(
+				...deviceSavings
+					.filter((ds) => ds.device_id === id)
+					.map((ds) => ds.timestamp.getTime())
+			)
+		);
+		const maxDeviceDate = new Date(
+			Math.max(
+				...deviceSavings
+					.filter((ds) => ds.device_id === id)
+					.map((ds) => ds.timestamp.getTime())
+			)
+		);
+
+		// remove chunks that are not in the range
+		dateChunks = dateChunks.filter((dateChunk) => {
+			const chunkStart = dateChunk.from.getTime();
+			const chunkEnd = dateChunk.to.getTime();
+			const minTime = minDeviceDate.getTime();
+			const maxTime = maxDeviceDate.getTime();
+
+			// Check if the chunk overlaps with the device savings date range
+			return chunkStart <= maxTime && chunkEnd >= minTime;
+		});
 
 		try {
 			// try to get the cached device data
@@ -60,12 +93,12 @@ const deviceSavingsRetrievalController =
 			const data = dateChunks.map((chunk) => {
 				const chunkTotal = savingsService.calculateTotalSavedInRange(
 					id,
-					chunk.start,
-					chunk.end
+					chunk.from,
+					chunk.to
 				);
 				return {
-					from: chunk.start,
-					to: chunk.end,
+					from: chunk.from,
+					to: chunk.to,
 					totalCarbon: chunkTotal.totalCarbon,
 					totalDiesel: chunkTotal.totalDiesel,
 				};
@@ -78,10 +111,12 @@ const deviceSavingsRetrievalController =
 				savingsChunks: data,
 			});
 		} catch (error) {
+			let errorMessage;
+			if (error instanceof Error) errorMessage = error.message;
 			next(
 				new CustomError(
 					500,
-					'Error fetching device savings data',
+					errorMessage || 'Error fetching device savings data',
 					'Internal Server Error'
 				)
 			);

@@ -1,22 +1,24 @@
+import { DeviceSavingsResolution } from '../types';
+
 interface DateChunk {
-	start: Date;
-	end: Date;
+	from: Date;
+	to: Date;
 }
 
 const getDateChunks = (
-	start: Date,
-	end: Date,
-	resolution: 'month' | 'week' | 'day'
+	from: Date,
+	to: Date,
+	resolution: DeviceSavingsResolution
 ): DateChunk[] => {
 	let dateChunks: DateChunk[] = [];
 	switch (resolution) {
 		case 'month':
 			let currentMonthStart = new Date(
-				Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1)
+				Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), 1)
 			);
 
 			// Keep iterating until the current month start is beyond the end date
-			while (currentMonthStart < end) {
+			while (currentMonthStart < to) {
 				// Get the last day of the current month
 				let currentMonthEnd = new Date(
 					Date.UTC(
@@ -31,15 +33,14 @@ const getDateChunks = (
 				);
 
 				// If the current month end is beyond the overall end, use overall end date instead
-				if (currentMonthEnd >= end) {
-					currentMonthEnd = end;
+				if (currentMonthEnd >= to) {
+					currentMonthEnd = to;
 				}
 
 				// Push the chunk, using the actual start date for the first chunk
 				dateChunks.push({
-					start:
-						currentMonthStart > start ? currentMonthStart : start,
-					end: currentMonthEnd,
+					from: currentMonthStart > from ? currentMonthStart : from,
+					to: currentMonthEnd,
 				});
 
 				// Set the start of the next month
@@ -54,12 +55,12 @@ const getDateChunks = (
 			break;
 		case 'week':
 			// Start at the beginning of the week in which 'start' is located
-			let currentStart = start;
+			let currentStart = from;
 			let dayShift = 7 - currentStart.getUTCDay();
 			let changeFlag = dayShift === 6;
 
 			// Iterate from the 'currentStart' to 'end', one week at a time
-			while (currentStart < end) {
+			while (currentStart < to) {
 				const currentEnd = new Date(
 					Date.UTC(
 						currentStart.getUTCFullYear(),
@@ -74,8 +75,8 @@ const getDateChunks = (
 				}
 
 				dateChunks.push({
-					start: currentStart,
-					end: currentEnd > end ? end : currentEnd,
+					from: currentStart,
+					to: currentEnd > to ? to : currentEnd,
 				});
 
 				currentStart = new Date(
@@ -88,10 +89,10 @@ const getDateChunks = (
 			}
 			break;
 		case 'day':
-			let currentDayStart = start;
+			let currentDayStart = from;
 
 			// Iterate from 'start' to 'end', one day at a time
-			while (currentDayStart < end) {
+			while (currentDayStart < to) {
 				const currentDayEnd = new Date(
 					Date.UTC(
 						currentDayStart.getUTCFullYear(),
@@ -103,8 +104,8 @@ const getDateChunks = (
 				const endOfDay = new Date(currentDayEnd.getTime() - 1);
 
 				dateChunks.push({
-					start: currentDayStart,
-					end: endOfDay > end ? end : endOfDay,
+					from: currentDayStart,
+					to: endOfDay > to ? to : endOfDay,
 				});
 
 				currentDayStart = currentDayEnd;
