@@ -133,7 +133,7 @@ class SavingsService {
 		return { totalCarbon, totalDiesel, averageCarbon, averageDiesel };
 	}
 
-	private calculateTotalSavedInRange(
+	public calculateTotalSavedInRange(
 		deviceId: number,
 		start: Date,
 		end: Date

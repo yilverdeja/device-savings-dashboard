@@ -35,22 +35,25 @@ router.get('/savings/:deviceId', async (req, res) => {
 		const { totalCarbon: carbon, totalDiesel: diesel } =
 			await savingsService.getSavingsData(parseInt(deviceId));
 
-		// filter the data based on the query
-
-		const deviceSavings = dataService.getDeviceSavings() || [];
-		const filteredData = deviceSavings.filter((saving) => {
-			const savingTimestamp = new Date(saving.timestamp);
-			return (
-				saving.device_id === parseInt(deviceId) &&
-				savingTimestamp >= start &&
-				savingTimestamp <= end
+		// get total energy savings per chunk range
+		const data = dateChunks.map((chunk) => {
+			const chunkTotal = savingsService.calculateTotalSavedInRange(
+				parseInt(deviceId),
+				chunk.start,
+				chunk.end
 			);
+			return {
+				start: chunk.start,
+				end: chunk.end,
+				totalCarbon: chunkTotal.totalCarbon,
+				totalDiesel: chunkTotal.totalDiesel,
+			};
 		});
 
 		res.json({
 			totalCarbon: carbon,
 			totalDiesel: diesel,
-			savingsData: filteredData,
+			savingsData: data,
 		});
 	} catch (error) {
 		res.status(500).json({
