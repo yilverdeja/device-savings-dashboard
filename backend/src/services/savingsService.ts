@@ -1,3 +1,4 @@
+import { DeviceSaving } from '../types';
 import cacheManager from './cacheManager';
 import { DataService } from './dataService';
 
@@ -74,25 +75,9 @@ class SavingsService {
 		}
 	}
 
-	private calculateTotalSaved(deviceId: number): TotalSavingsData {
-		let deviceSavings = dataService.getDeviceSavings() || [];
-
-		// filter by deviceId
-		deviceSavings = deviceSavings.filter((ds) => ds.device_id === deviceId);
-
-		if (!deviceSavings.length) {
-			// Handle the case where no savings data is found for the device
-			throw new Error(`No savings data found for device ID ${deviceId}`);
-		}
-
-		const totalCarbon = deviceSavings.reduce(
-			(acc, ds) => acc + ds.carbon_saved,
-			0
-		);
-		const totalDiesel = deviceSavings.reduce(
-			(acc, ds) => acc + ds.fueld_saved,
-			0
-		);
+	private calculateMontlyAverageMultiplier(deviceSavings: DeviceSaving[]) {
+		// assumption that a month averages at 30 days
+		const daysInAMonth = 30;
 
 		// get the minimum and maximum dates in the deviceSavings
 		const minDeviceDate = new Date(
@@ -108,17 +93,51 @@ class SavingsService {
 				(24 * 60 * 60 * 1000)
 		); // milliseconds representation of 1 day
 
-		// assumption that a month averages at 30 days
-		const daysInAMonth = 30;
+		// average monthly = (total / days) * (num days in month) = total * (num days in a month / days )
+		return daysInAMonth / daysBetweenMinMaxDates;
+	}
+
+	private calculateTotalCarbonDieselSaved(deviceSavings: DeviceSaving[]) {
+		const totalCarbon = deviceSavings.reduce(
+			(acc, ds) => acc + ds.carbon_saved,
+			0
+		);
+		const totalDiesel = deviceSavings.reduce(
+			(acc, ds) => acc + ds.fueld_saved,
+			0
+		);
+
+		return { totalCarbon, totalDiesel };
+	}
+
+	private calculateTotalSaved(deviceId: number): TotalSavingsData {
+		let deviceSavings = dataService.getDeviceSavings() || [];
+
+		// filter by deviceId
+		deviceSavings = deviceSavings.filter((ds) => ds.device_id === deviceId);
+
+		if (!deviceSavings.length) {
+			// Handle the case where no savings data is found for the device
+			throw new Error(`No savings data found for device ID ${deviceId}`);
+		}
+
+		// calculates the total carbon and diesel saved from the deviceSavings data provided
+		const { totalCarbon, totalDiesel } =
+			this.calculateTotalCarbonDieselSaved(deviceSavings);
 
 		// calculate the total monthly average based on the min and max dates
-		const averageCarbon =
-			(totalCarbon / daysBetweenMinMaxDates) * daysInAMonth;
-		const averageDiesel =
-			(totalDiesel / daysBetweenMinMaxDates) * daysInAMonth;
+		const multiplier = this.calculateMontlyAverageMultiplier(deviceSavings);
+		const averageCarbon = totalCarbon * multiplier;
+		const averageDiesel = totalDiesel * multiplier;
 
 		return { totalCarbon, totalDiesel, averageCarbon, averageDiesel };
 	}
+
+	private calculateTotalSavedInRange(
+		deviceId: number,
+		start: Date,
+		end: Date
+	) {}
 }
 
 export const savingsService = new SavingsService();
