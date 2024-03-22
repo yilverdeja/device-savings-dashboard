@@ -1,27 +1,9 @@
 <script setup lang="ts">
 import { Flex, Button, DatePicker } from 'ant-design-vue';
-
-import DataItem from './DataItem.vue';
-
-import { use } from 'echarts/core';
-import { CanvasRenderer } from 'echarts/renderers';
-import { PieChart } from 'echarts/charts';
-import {
-	TitleComponent,
-	TooltipComponent,
-	LegendComponent,
-} from 'echarts/components';
-import VChart from 'vue-echarts';
-
 import { ref } from 'vue';
 
-use([
-	CanvasRenderer,
-	PieChart,
-	TitleComponent,
-	TooltipComponent,
-	LegendComponent,
-]);
+import DataItem from './DataItem.vue';
+import SavingsBarGraph from './SavingsBarGraph.vue';
 
 type SavingsChunk = {
 	from: Date;
@@ -65,43 +47,35 @@ const dieselItem: DataItem = {
 	units: 'Litres',
 };
 
-const option = ref({
-	title: {
-		text: 'Traffic Sources',
-		left: 'center',
-	},
-	tooltip: {
-		trigger: 'item',
-		formatter: '{a} <br/>{b} : {c} ({d}%)',
-	},
-	legend: {
-		orient: 'vertical',
-		left: 'left',
-		data: ['Direct', 'Email', 'Ad Networks', 'Video Ads', 'Search Engines'],
-	},
-	series: [
-		{
-			name: 'Traffic Sources',
-			type: 'pie',
-			radius: '55%',
-			center: ['50%', '60%'],
-			data: [
-				{ value: 335, name: 'Direct' },
-				{ value: 310, name: 'Email' },
-				{ value: 234, name: 'Ad Networks' },
-				{ value: 135, name: 'Video Ads' },
-				{ value: 1548, name: 'Search Engines' },
-			],
-			emphasis: {
-				itemStyle: {
-					shadowBlur: 10,
-					shadowOffsetX: 0,
-					shadowColor: 'rgba(0, 0, 0, 0.5)',
-				},
-			},
-		},
-	],
-});
+// const carbonData = ref<number[]>([
+// 	/* ... */
+// ]);
+// const dieselData = ref<number[]>([
+// 	/* ... */
+// ]);
+// const timeData = ref<string[]>([
+// 	/* ... */
+// ]);
+// const timeScale = ref<string>('month-year');
+
+const carbonData = ref([1200, 1320, 1010, 1340, 900, 2300, 2100]);
+const dieselData = ref([2200, 1820, 1910, 2340, 2900, 3300, 3100]);
+const timeData = ref([
+	'January',
+	'February',
+	'March',
+	'April',
+	'May',
+	'June',
+	'July',
+]);
+const timeScale = ref('Monthly');
+
+const handleZoom = (event: any) => {
+	// Handle the zoom event
+	// Fetch new data based on the zoom level or perform other actions
+	console.log('Zoom event triggered', event);
+};
 </script>
 
 <template>
@@ -120,12 +94,16 @@ const option = ref({
 			<DataItem :item="carbonItem" color="primary" />
 			<DataItem :item="dieselItem" color="secondary" />
 		</Flex>
-		<v-chart class="chart" :option="option" autoresize />
+		<div style="width: 600px; height: 400px">
+			<SavingsBarGraph
+				:carbonData="carbonData"
+				:dieselData="dieselData"
+				:timeData="timeData"
+				:timeScale="timeScale"
+				@zoom="handleZoom"
+			/>
+		</div>
 	</Flex>
 </template>
 
-<style scoped>
-.chart {
-	height: 100vh;
-}
-</style>
+<style scoped></style>
