@@ -2,6 +2,7 @@
 import { TypographyTitle, Divider, Row, Col } from 'ant-design-vue';
 import { ref } from 'vue';
 import DeviceCard from './components/DeviceCard.vue';
+import DeviceModal from './components/DeviceModal.vue';
 
 interface Device {
 	id: number;
@@ -41,14 +42,23 @@ const devices = ref<DeviceResponse[]>([
 		totalDiesel: 7,
 	},
 ]);
+
+const selectedDevice = ref<number | null>(null);
+
 const openDeviceInformation = (deviceId: number) => {
+	selectedDevice.value = deviceId;
 	console.log(`Open device ${deviceId} information`);
+};
+
+const removeSelectedDevice = () => {
+	selectedDevice.value = null;
 };
 </script>
 
 <template>
 	<TypographyTitle>Energy Savings Dashboard</TypographyTitle>
 	<Divider orientation="left">Devices</Divider>
+	<DeviceModal :id="selectedDevice" :closeModal="removeSelectedDevice" />
 	<Row :gutter="[16, 16]">
 		<Col v-for="device in devices" class="gutter-row" :span="8">
 			<DeviceCard

@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     DeviceCard: typeof import('./src/components/DeviceCard.vue')['default']
+    DeviceModal: typeof import('./src/components/DeviceModal.vue')['default']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
   }
 }
