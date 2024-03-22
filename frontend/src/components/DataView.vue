@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Flex } from 'ant-design-vue';
+import DataItem from './DataItem.vue';
 
 interface DataItem {
 	title?: string;
@@ -12,6 +13,7 @@ interface Props {
 	title: string;
 	information?: string;
 	dataItems: DataItem[];
+	color: 'primary' | 'secondary';
 }
 
 defineProps<Props>();
@@ -22,9 +24,15 @@ defineProps<Props>();
 		<h3>{{ title }}</h3>
 		<p v-if="information">{{ information }}</p>
 		<Flex justify="space-evenly" align="center" gap="large">
-			<div v-for="(item, index) in dataItems" :key="index">
+			<DataItem
+				v-for="(item, index) in dataItems"
+				:key="index"
+				:item="item"
+				:color="color"
+			/>
+			<!-- <div v-for="(item, index) in dataItems" :key="index">
 				{{ item.information }}
-			</div>
+			</div> -->
 		</Flex>
 	</div>
 </template>

@@ -64,11 +64,13 @@ const dieselDataItems: DataItem[] = [
 			title="Estimated Carbon Savings"
 			information="1 Tonne = 1,000 kg"
 			:data-items="carbonDataItems"
+			color="primary"
 		/>
 		<Divider></Divider>
 		<DataView
 			title="Estimated Diesel Savings"
 			:data-items="dieselDataItems"
+			color="secondary"
 		/>
 		<Divider></Divider>
 		<div>Detailed Data</div>

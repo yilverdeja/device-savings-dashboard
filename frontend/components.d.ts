@@ -7,6 +7,7 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    DataItem: typeof import('./src/components/DataItem.vue')['default']
     DataView: typeof import('./src/components/DataView.vue')['default']
     DeviceCard: typeof import('./src/components/DeviceCard.vue')['default']
     DeviceModal: typeof import('./src/components/DeviceModal.vue')['default']
