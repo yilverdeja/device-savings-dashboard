@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import DataView from './DataView.vue';
+import DetailedDataView from './DetailedDataView.vue';
 import {
 	Modal,
 	Divider,
@@ -15,7 +16,21 @@ interface DataItem {
 	units: string;
 }
 
-defineProps<{
+type SavingsChunk = {
+	from: Date;
+	to: Date;
+	totalCarbon: number;
+	totalDiesel: number;
+};
+
+interface DeviceSavingsResponse {
+	device_id: number;
+	totalCarbon: number;
+	totalDiesel: number;
+	savingsChunks: SavingsChunk[];
+}
+
+const props = defineProps<{
 	id: number | null;
 	closeModal: () => void;
 }>();
@@ -44,6 +59,13 @@ const dieselDataItems: DataItem[] = [
 		units: 'Litres',
 	},
 ];
+
+const deviceSavings: DeviceSavingsResponse = {
+	device_id: props.id as number,
+	totalCarbon: 64.1,
+	totalDiesel: 43840.3,
+	savingsChunks: [] as SavingsChunk[],
+};
 </script>
 
 <template>
@@ -73,7 +95,7 @@ const dieselDataItems: DataItem[] = [
 			color="secondary"
 		/>
 		<Divider></Divider>
-		<div>Detailed Data</div>
+		<DetailedDataView :loading="false" :device-savings="deviceSavings" />
 	</Modal>
 </template>
 
