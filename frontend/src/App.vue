@@ -1,30 +1,63 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue';
+import { TypographyTitle, Divider, Row, Col } from 'ant-design-vue';
+import { ref } from 'vue';
+import DeviceCard from './components/DeviceCard.vue';
+
+interface Device {
+	id: number;
+	name: string;
+	timezone: string;
+}
+
+type DeviceSavingsInfo = {
+	totalCarbon: number;
+	totalDiesel: number;
+	averageCarbon: number;
+	averageDiesel: number;
+};
+
+type DeviceResponse = Device & Partial<DeviceSavingsInfo>;
+
+const devices = ref<DeviceResponse[]>([
+	{
+		id: 1,
+		name: 'robert',
+		timezone: 'america',
+		totalCarbon: 2,
+		totalDiesel: 3,
+	},
+	{
+		id: 2,
+		name: 'julian',
+		timezone: 'hongkong',
+		totalCarbon: 4,
+		totalDiesel: 5,
+	},
+	{
+		id: 3,
+		name: 'carol',
+		timezone: 'dubai',
+		totalCarbon: 6,
+		totalDiesel: 7,
+	},
+]);
+const openDeviceInformation = (deviceId: number) => {
+	console.log(`Open device ${deviceId} information`);
+};
 </script>
 
 <template>
-	<div>
-		<a href="https://vitejs.dev" target="_blank">
-			<img src="/vite.svg" class="logo" alt="Vite logo" />
-		</a>
-		<a href="https://vuejs.org/" target="_blank">
-			<img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-		</a>
-	</div>
-	<HelloWorld msg="Vite + Vue" />
+	<TypographyTitle>Energy Savings Dashboard</TypographyTitle>
+	<Divider orientation="left">Devices</Divider>
+	<Row :gutter="[16, 16]">
+		<Col v-for="device in devices" class="gutter-row" :span="8">
+			<DeviceCard
+				:device="device"
+				:loading="false"
+				:onSelect="openDeviceInformation"
+			/>
+		</Col>
+	</Row>
 </template>
 
-<style scoped>
-.logo {
-	height: 6em;
-	padding: 1.5em;
-	will-change: filter;
-	transition: filter 300ms;
-}
-.logo:hover {
-	filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-	filter: drop-shadow(0 0 2em #42b883aa);
-}
-</style>
+<style scoped></style>
