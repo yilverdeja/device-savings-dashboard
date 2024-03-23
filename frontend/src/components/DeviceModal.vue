@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Ref, ref, watch } from 'vue';
 import useDeviceSavings from '../hooks/useDeviceSavings';
-import { DataItemType, DeviceSavingsResponse, SavingsChunk } from '../types';
+import { DataItemType, DeviceSavingsResponse } from '../types';
 import DataView from './DataView.vue';
 import DetailedDataView from './DetailedDataView.vue';
 import { Modal, Divider } from 'ant-design-vue';
@@ -21,30 +21,44 @@ const {
 const carbonDataItems: Ref<DataItemType[]> = ref([]);
 const dieselDataItems: Ref<DataItemType[]> = ref([]);
 
+const carbonInfo: Ref<string | undefined> = ref(undefined);
+
 watch(deviceSavings, (newDeviceSavings: DeviceSavingsResponse) => {
 	if (newDeviceSavings) {
+		let { totalCarbon, averageCarbon, totalDiesel, averageDiesel } =
+			newDeviceSavings;
+
+		if (totalCarbon > 1000 || averageCarbon > 1000)
+			carbonInfo.value = '1 Tonne = 1,000 kg';
+
 		carbonDataItems.value = [
 			{
 				information: 'Total',
-				value: newDeviceSavings.totalCarbon,
-				units: 'Tonnes',
+				value:
+					totalCarbon > 1000
+						? Math.round((totalCarbon / 1000) * 10) / 10
+						: Math.round(totalCarbon * 10) / 10,
+				units: totalCarbon > 1000 ? 'Tonnes' : 'Kgs',
 			},
 			{
 				information: 'Month',
-				value: newDeviceSavings.averageCarbon,
-				units: 'Tonnes',
+				value:
+					averageCarbon > 1000
+						? Math.round((averageCarbon / 1000) * 10) / 10
+						: Math.round(averageCarbon * 10) / 10,
+				units: averageCarbon > 1000 ? 'Tonnes' : 'Kgs',
 			},
 		];
 
 		dieselDataItems.value = [
 			{
 				information: 'Total',
-				value: newDeviceSavings.totalDiesel,
+				value: Math.round(totalDiesel * 10) / 10,
 				units: 'Litres',
 			},
 			{
 				information: 'Month',
-				value: newDeviceSavings.averageDiesel,
+				value: Math.round(averageDiesel * 10) / 10,
 				units: 'Litres',
 			},
 		];
@@ -68,7 +82,7 @@ watch(deviceSavings, (newDeviceSavings: DeviceSavingsResponse) => {
 		<Divider></Divider>
 		<DataView
 			title="Estimated Carbon Savings"
-			information="1 Tonne = 1,000 kg"
+			:information="carbonInfo"
 			:data-items="carbonDataItems"
 			:loading="isLoading"
 			color="primary"
@@ -99,7 +113,6 @@ watch(deviceSavings, (newDeviceSavings: DeviceSavingsResponse) => {
 .full-modal .ant-modal-content {
 	display: flex;
 	flex-direction: column;
-	/* height: calc(100vh); */
 	margin: 10px;
 	padding: 0;
 }

@@ -32,7 +32,9 @@ const textColorStyle = () => {
 			</p>
 			<InfoCircleOutlined class="" />
 		</Flex>
-		<p class="text value" :class="textColorStyle()">{{ item.value }}</p>
+		<p class="text value" :class="textColorStyle()">
+			{{ item.value.toLocaleString() }}
+		</p>
 		<p class="text units" :class="textColorStyle()">{{ item.units }}</p>
 	</Flex>
 </template>

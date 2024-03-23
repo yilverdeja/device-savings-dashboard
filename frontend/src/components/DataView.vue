@@ -7,6 +7,7 @@ interface Props {
 	title: string;
 	information?: string;
 	dataItems: DataItemType[];
+	loading: boolean;
 	color: 'primary' | 'secondary';
 }
 
@@ -17,14 +18,17 @@ defineProps<Props>();
 	<div>
 		<h3>{{ title }}</h3>
 		<p v-if="information">{{ information }}</p>
-		<Flex justify="space-evenly" align="center" gap="large">
-			<DataItem
-				v-for="(item, index) in dataItems"
-				:key="index"
-				:item="item"
-				:color="color"
-			/>
-		</Flex>
+		<div v-if="loading">Loading...</div>
+		<div v-else>
+			<Flex justify="space-evenly" align="center" gap="large">
+				<DataItem
+					v-for="(item, index) in dataItems"
+					:key="index"
+					:item="item"
+					:color="color"
+				/>
+			</Flex>
+		</div>
 	</div>
 </template>
 
