@@ -3,21 +3,7 @@ import { TypographyTitle, Divider, Row, Col } from 'ant-design-vue';
 import { ref } from 'vue';
 import DeviceCard from './components/DeviceCard.vue';
 import DeviceModal from './components/DeviceModal.vue';
-
-interface Device {
-	id: number;
-	name: string;
-	timezone: string;
-}
-
-type DeviceSavingsInfo = {
-	totalCarbon: number;
-	totalDiesel: number;
-	averageCarbon: number;
-	averageDiesel: number;
-};
-
-type DeviceResponse = Device & Partial<DeviceSavingsInfo>;
+import { DeviceResponse } from './types';
 
 const devices = ref<DeviceResponse[]>([
 	{

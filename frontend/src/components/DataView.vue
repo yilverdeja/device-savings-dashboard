@@ -1,18 +1,12 @@
 <script setup lang="ts">
 import { Flex } from 'ant-design-vue';
 import DataItem from './DataItem.vue';
-
-interface DataItem {
-	title?: string;
-	information?: string;
-	value: number;
-	units: string;
-}
+import { DataItemType } from '../types';
 
 interface Props {
 	title: string;
 	information?: string;
-	dataItems: DataItem[];
+	dataItems: DataItemType[];
 	color: 'primary' | 'secondary';
 }
 
@@ -30,9 +24,6 @@ defineProps<Props>();
 				:item="item"
 				:color="color"
 			/>
-			<!-- <div v-for="(item, index) in dataItems" :key="index">
-				{{ item.information }}
-			</div> -->
 		</Flex>
 	</div>
 </template>

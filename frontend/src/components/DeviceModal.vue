@@ -1,41 +1,15 @@
 <script setup lang="ts">
+import { DataItemType, DeviceSavingsResponse, SavingsChunk } from '../types';
 import DataView from './DataView.vue';
 import DetailedDataView from './DetailedDataView.vue';
-import {
-	Modal,
-	Divider,
-	// Layout,
-	// LayoutHeader,
-	// LayoutContent,
-} from 'ant-design-vue';
-
-interface DataItem {
-	title?: string;
-	information?: string;
-	value: number;
-	units: string;
-}
-
-type SavingsChunk = {
-	from: Date;
-	to: Date;
-	totalCarbon: number;
-	totalDiesel: number;
-};
-
-interface DeviceSavingsResponse {
-	device_id: number;
-	totalCarbon: number;
-	totalDiesel: number;
-	savingsChunks: SavingsChunk[];
-}
+import { Modal, Divider } from 'ant-design-vue';
 
 const props = defineProps<{
 	id: number | null;
 	closeModal: () => void;
 }>();
 
-const carbonDataItems: DataItem[] = [
+const carbonDataItems: DataItemType[] = [
 	{
 		information: 'Total',
 		value: 64.1,
@@ -47,7 +21,7 @@ const carbonDataItems: DataItem[] = [
 		units: 'Tonnes',
 	},
 ];
-const dieselDataItems: DataItem[] = [
+const dieselDataItems: DataItemType[] = [
 	{
 		information: 'Total',
 		value: 43840.3,

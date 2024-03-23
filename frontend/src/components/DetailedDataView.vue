@@ -1,30 +1,10 @@
 <script setup lang="ts">
+import { DeviceSavingsResponse, DataItemType } from '../types.ts';
 import { Flex, Button, DatePicker } from 'ant-design-vue';
 import { ref } from 'vue';
 
 import DataItem from './DataItem.vue';
 import SavingsBarGraph from './SavingsBarGraph.vue';
-
-type SavingsChunk = {
-	from: Date;
-	to: Date;
-	totalCarbon: number;
-	totalDiesel: number;
-};
-
-interface DeviceSavingsResponse {
-	device_id: number;
-	totalCarbon: number;
-	totalDiesel: number;
-	savingsChunks: SavingsChunk[];
-}
-
-interface DataItem {
-	title?: string;
-	information?: string;
-	value: number;
-	units: string;
-}
 
 interface Props {
 	loading: boolean;
@@ -33,14 +13,14 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const carbonItem: DataItem = {
+const carbonItem: DataItemType = {
 	title: 'Estimated Carbon Savings',
 	information: 'Sum of selected date range',
 	value: props.deviceSavings.totalCarbon,
 	units: 'Tonnes',
 };
 
-const dieselItem: DataItem = {
+const dieselItem: DataItemType = {
 	title: 'Estimated Diesel Savings',
 	information: 'Sum of selected date range',
 	value: props.deviceSavings.totalDiesel,

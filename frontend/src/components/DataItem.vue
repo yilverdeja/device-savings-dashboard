@@ -1,16 +1,10 @@
 <script setup lang="ts">
 import { Flex } from 'ant-design-vue';
 import { InfoCircleOutlined } from '@ant-design/icons-vue';
-
-interface DataItem {
-	title?: string;
-	information?: string;
-	value: number;
-	units: string;
-}
+import { DataItemType } from '../types';
 
 interface Props {
-	item: DataItem;
+	item: DataItemType;
 	color: 'primary' | 'secondary';
 }
 

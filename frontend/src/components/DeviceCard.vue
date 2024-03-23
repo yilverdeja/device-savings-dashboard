@@ -1,20 +1,6 @@
 <script setup lang="ts">
 import { AnchorLink, Card, Divider, Row, Col } from 'ant-design-vue';
-
-interface Device {
-	id: number;
-	name: string;
-	timezone: string;
-}
-
-type DeviceSavingsInfo = {
-	totalCarbon: number;
-	totalDiesel: number;
-	averageCarbon: number;
-	averageDiesel: number;
-};
-
-type DeviceResponse = Device & Partial<DeviceSavingsInfo>;
+import { DeviceResponse } from '../types';
 
 defineProps<{
 	device: DeviceResponse;
