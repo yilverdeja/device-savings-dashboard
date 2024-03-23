@@ -86,7 +86,7 @@ const deviceSavingsRetrievalController =
 
 		try {
 			// try to get the cached device data
-			const { totalCarbon: carbon, totalDiesel: diesel } =
+			const { totalCarbon, totalDiesel, averageCarbon, averageDiesel } =
 				await savingsService.getSavingsData(id);
 
 			// get total energy savings per chunk range
@@ -106,8 +106,10 @@ const deviceSavingsRetrievalController =
 
 			res.json({
 				device_id: id,
-				totalCarbon: carbon,
-				totalDiesel: diesel,
+				totalCarbon,
+				totalDiesel,
+				averageCarbon,
+				averageDiesel,
 				savingsChunks: data,
 			});
 		} catch (error) {

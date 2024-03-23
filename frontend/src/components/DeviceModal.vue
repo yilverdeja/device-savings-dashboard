@@ -1,45 +1,55 @@
 <script setup lang="ts">
+import { Ref, ref, watch } from 'vue';
+import useDeviceSavings from '../hooks/useDeviceSavings';
 import { DataItemType, DeviceSavingsResponse, SavingsChunk } from '../types';
 import DataView from './DataView.vue';
 import DetailedDataView from './DetailedDataView.vue';
 import { Modal, Divider } from 'ant-design-vue';
 
 const props = defineProps<{
-	id: number | null;
+	id: number;
 	closeModal: () => void;
 }>();
 
-const carbonDataItems: DataItemType[] = [
-	{
-		information: 'Total',
-		value: 64.1,
-		units: 'Tonnes',
-	},
-	{
-		information: 'Month',
-		value: 5.1,
-		units: 'Tonnes',
-	},
-];
-const dieselDataItems: DataItemType[] = [
-	{
-		information: 'Total',
-		value: 43840.3,
-		units: 'Litres',
-	},
-	{
-		information: 'Month',
-		value: 3242.8,
-		units: 'Litres',
-	},
-];
+const {
+	data: deviceSavings,
+	isLoading,
+	isError,
+	error,
+} = useDeviceSavings(props.id, {});
 
-const deviceSavings: DeviceSavingsResponse = {
-	device_id: props.id as number,
-	totalCarbon: 64.1,
-	totalDiesel: 43840.3,
-	savingsChunks: [] as SavingsChunk[],
-};
+const carbonDataItems: Ref<DataItemType[]> = ref([]);
+const dieselDataItems: Ref<DataItemType[]> = ref([]);
+
+watch(deviceSavings, (newDeviceSavings: DeviceSavingsResponse) => {
+	if (newDeviceSavings) {
+		carbonDataItems.value = [
+			{
+				information: 'Total',
+				value: newDeviceSavings.totalCarbon,
+				units: 'Tonnes',
+			},
+			{
+				information: 'Month',
+				value: newDeviceSavings.averageCarbon,
+				units: 'Tonnes',
+			},
+		];
+
+		dieselDataItems.value = [
+			{
+				information: 'Total',
+				value: newDeviceSavings.totalDiesel,
+				units: 'Litres',
+			},
+			{
+				information: 'Month',
+				value: newDeviceSavings.averageDiesel,
+				units: 'Litres',
+			},
+		];
+	}
+});
 </script>
 
 <template>
@@ -60,16 +70,22 @@ const deviceSavings: DeviceSavingsResponse = {
 			title="Estimated Carbon Savings"
 			information="1 Tonne = 1,000 kg"
 			:data-items="carbonDataItems"
+			:loading="isLoading"
 			color="primary"
 		/>
 		<Divider></Divider>
 		<DataView
 			title="Estimated Diesel Savings"
 			:data-items="dieselDataItems"
+			:loading="isLoading"
 			color="secondary"
 		/>
 		<Divider></Divider>
-		<DetailedDataView :loading="false" :device-savings="deviceSavings" />
+		<DetailedDataView
+			v-if="deviceSavings"
+			:loading="isLoading"
+			:device-savings="deviceSavings"
+		/>
 	</Modal>
 </template>
 

@@ -31,6 +31,8 @@ export interface DeviceSavingsResponse {
 	device_id: number;
 	totalCarbon: number;
 	totalDiesel: number;
+	averageCarbon: number;
+	averageDiesel: number;
 	savingsChunks: SavingsChunk[];
 }
 
@@ -48,3 +50,7 @@ export type DeviceSavingsInfo = {
 };
 
 export type DeviceResponse = Device & Partial<DeviceSavingsInfo>;
+
+export interface DevicesResponse {
+	devices: DeviceResponse[];
+}

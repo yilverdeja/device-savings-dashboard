@@ -17,8 +17,8 @@ class SavingsService {
 		try {
 			const cachedTotalCarbonKey = `totalCarbon-${deviceId}`;
 			const cachedTotalDieselKey = `totalDiesel-${deviceId}`;
-			const cachedMonthAverageCarbonKey = `totalCarbon-${deviceId}`;
-			const cachedMonthAverageDieselKey = `totalDiesel-${deviceId}`;
+			const cachedMonthAverageCarbonKey = `averageCarbon-${deviceId}`;
+			const cachedMonthAverageDieselKey = `averageDiesel-${deviceId}`;
 
 			let totalCarbon: number | null = await cacheManager.get<
 				number | null

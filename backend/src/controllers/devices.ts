@@ -1,17 +1,15 @@
 import { TotalSavingsData, savingsService } from './../services/savingsService';
 import { DataService } from '../services/dataService';
-import { Device, DevicesRequest, DevicesResponse } from '../types';
+import { DeviceResponse } from '../types';
 import { NextFunction, Request, Response } from 'express';
 import { CustomError } from '../utils/customError';
 import { validationResult } from 'express-validator';
-
-export type DeviceWithTotalSavings = Device & TotalSavingsData;
 
 const devicesRetrievalController =
 	(dataService: DataService) =>
 	async (
 		req: Request,
-		res: Response<DevicesResponse>,
+		res: Response<DeviceResponse[]>,
 		next: NextFunction
 	) => {
 		const validationErrors = validationResult(req);
@@ -38,21 +36,14 @@ const devicesRetrievalController =
 		const { includeSavings = false } = req.query;
 		if (includeSavings) {
 			try {
-				const deviceWithSavings: DeviceWithTotalSavings[] =
-					await Promise.all(
-						devices.map(
-							async (device): Promise<DeviceWithTotalSavings> => {
-								const savingsData: TotalSavingsData =
-									await savingsService.getSavingsData(
-										device.id
-									);
-								return { ...device, ...savingsData };
-							}
-						)
-					);
-				res.json({
-					devices: deviceWithSavings,
-				});
+				const deviceWithSavings: DeviceResponse[] = await Promise.all(
+					devices.map(async (device): Promise<DeviceResponse> => {
+						const savingsData: TotalSavingsData =
+							await savingsService.getSavingsData(device.id);
+						return { ...device, ...savingsData };
+					})
+				);
+				res.json(deviceWithSavings);
 			} catch (error) {
 				next(
 					new CustomError(
@@ -63,7 +54,7 @@ const devicesRetrievalController =
 				);
 			}
 		} else {
-			res.json({ devices });
+			res.json(devices as DeviceResponse[]);
 		}
 	};
 
