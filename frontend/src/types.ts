@@ -7,6 +7,17 @@ export interface DataItemType {
 }
 
 // Request Interfaces
+export interface DevicesRequest {
+	includeSavings?: boolean;
+}
+
+export type DeviceSavingsResolution = 'month' | 'week' | 'day';
+
+export interface DeviceSavingsRequest {
+	from?: Date;
+	to?: Date;
+	resolution?: DeviceSavingsResolution;
+}
 
 // Response Interfaces
 export type SavingsChunk = {

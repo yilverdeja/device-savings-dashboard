@@ -1,33 +1,36 @@
 <script setup lang="ts">
-import { TypographyTitle, Divider, Row, Col } from 'ant-design-vue';
-import { ref } from 'vue';
+import { TypographyTitle, Divider, Row, Col, Flex } from 'ant-design-vue';
+import { ref, onMounted, watch } from 'vue';
 import DeviceCard from './components/DeviceCard.vue';
 import DeviceModal from './components/DeviceModal.vue';
-import { DeviceResponse } from './types';
+// import { DeviceResponse } from './types';
+import useDevices from './hooks/useDevices';
+import { nextTick } from 'vue';
 
-const devices = ref<DeviceResponse[]>([
-	{
-		id: 1,
-		name: 'robert',
-		timezone: 'america',
-		totalCarbon: 2,
-		totalDiesel: 3,
-	},
-	{
-		id: 2,
-		name: 'julian',
-		timezone: 'hongkong',
-		totalCarbon: 4,
-		totalDiesel: 5,
-	},
-	{
-		id: 3,
-		name: 'carol',
-		timezone: 'dubai',
-		totalCarbon: 6,
-		totalDiesel: 7,
-	},
-]);
+// ... after your data is fetched and updated
+nextTick(() => {
+	console.log('DOM updated');
+	console.log(data.value);
+	// You can check the element's height here to debug
+});
+
+const includeSavings = ref(true);
+const { data, isLoading, error } = useDevices({
+	includeSavings: includeSavings.value,
+});
+
+const devices = ref([]);
+onMounted(() => {
+	if (data.value) {
+		devices.value = data.value.devices;
+	}
+});
+
+watch(data, (newValue) => {
+	if (newValue) {
+		devices.value = newValue.devices;
+	}
+});
 
 const selectedDevice = ref<number | null>(null);
 
@@ -42,18 +45,20 @@ const removeSelectedDevice = () => {
 </script>
 
 <template>
-	<TypographyTitle>Energy Savings Dashboard</TypographyTitle>
-	<Divider orientation="left">Devices</Divider>
-	<DeviceModal :id="selectedDevice" :closeModal="removeSelectedDevice" />
-	<Row :gutter="[16, 16]">
-		<Col v-for="device in devices" class="gutter-row" :span="8">
-			<DeviceCard
-				:device="device"
-				:loading="false"
-				:onSelect="openDeviceInformation"
-			/>
-		</Col>
-	</Row>
+	<Flex vertical>
+		<TypographyTitle>Energy Savings Dashboard</TypographyTitle>
+		<Divider orientation="left">Devices</Divider>
+		<DeviceModal :id="selectedDevice" :closeModal="removeSelectedDevice" />
+		<Row :gutter="[16, 16]">
+			<Col v-for="device in devices" class="gutter-row" :span="8">
+				<DeviceCard
+					:device="device"
+					:loading="false"
+					:onSelect="openDeviceInformation"
+				/>
+			</Col>
+		</Row>
+	</Flex>
 </template>
 
 <style scoped></style>
