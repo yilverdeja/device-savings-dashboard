@@ -40,45 +40,35 @@ const deviceSavingsRetrievalController =
 
 		// defaults to current date
 		const toDate =
-			to === undefined ? defaultToDate : new Date(to as string);
+			to === undefined ? new Date(defaultToDate) : new Date(to as string);
 
 		// defaults to 30 days before toDate
+		// Create a new Date object based on toDate's timestamp
 		const fromDate =
 			from === undefined
-				? new Date(toDate.setDate(toDate.getDate() - 30))
+				? new Date(new Date(toDate).setDate(toDate.getDate() - 30))
 				: new Date(from as string);
 
-		// casts to the right type
+		// casts to the right type or set to default "month" if not set
 		const resolutionType: DeviceSavingsResolution =
-			resolution as DeviceSavingsResolution;
+			resolution === undefined
+				? 'month'
+				: (resolution as DeviceSavingsResolution);
 
 		// create chunks based on resolution
 		let dateChunks = getDateChunks(fromDate, toDate, resolutionType);
 		const deviceSavings = dataService.getDeviceSavings() as DeviceSaving[];
 
-		// TODO: Move dataChunks filtering somewhere else
-		// get the minimum and maximum dates in the deviceSavings
-		const minDeviceDate = new Date(
-			Math.min(
-				...deviceSavings
-					.filter((ds) => ds.device_id === id)
-					.map((ds) => ds.timestamp.getTime())
-			)
-		);
-		const maxDeviceDate = new Date(
-			Math.max(
-				...deviceSavings
-					.filter((ds) => ds.device_id === id)
-					.map((ds) => ds.timestamp.getTime())
-			)
+		const { minDate, maxDate } = savingsService.calculateMinMaxDate(
+			deviceSavings.filter((ds) => ds.device_id === id)
 		);
 
 		// remove chunks that are not in the range
 		dateChunks = dateChunks.filter((dateChunk) => {
 			const chunkStart = dateChunk.from.getTime();
 			const chunkEnd = dateChunk.to.getTime();
-			const minTime = minDeviceDate.getTime();
-			const maxTime = maxDeviceDate.getTime();
+			const minTime = minDate.getTime();
+			const maxTime = maxDate.getTime();
 
 			// Check if the chunk overlaps with the device savings date range
 			return chunkStart <= maxTime && chunkEnd >= minTime;
@@ -86,8 +76,9 @@ const deviceSavingsRetrievalController =
 
 		try {
 			// try to get the cached device data
-			const { totalCarbon, totalDiesel, averageCarbon, averageDiesel } =
-				await savingsService.getSavingsData(id);
+
+			const { totalCarbon, totalDiesel } =
+				savingsService.calculateTotalSavedInRange(id, fromDate, toDate);
 
 			// get total energy savings per chunk range
 			const data = dateChunks.map((chunk) => {
@@ -108,8 +99,6 @@ const deviceSavingsRetrievalController =
 				device_id: id,
 				totalCarbon,
 				totalDiesel,
-				averageCarbon,
-				averageDiesel,
 				savingsChunks: data,
 			});
 		} catch (error) {

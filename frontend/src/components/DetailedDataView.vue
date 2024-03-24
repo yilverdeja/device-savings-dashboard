@@ -1,33 +1,46 @@
 <script setup lang="ts">
-import { DeviceSavingsResponse, DataItemType } from '../types.ts';
+// import { DeviceSavingsResponse, DataItemType } from '../types.ts';
 import { Flex, Button, DatePicker } from 'ant-design-vue';
 import { ref } from 'vue';
 import dayjs, { Dayjs } from 'dayjs';
 
-import DataItem from './DataItem.vue';
-import SavingsBarGraph from './SavingsBarGraph.vue';
-
-const toDate = ref<Dayjs>(dayjs());
-const fromDate = ref<Dayjs>(toDate.value.subtract(30, 'day'));
+// import DataItem from './DataItem.vue';
+// import SavingsBarGraph from './SavingsBarGraph.vue';
+import useDeviceSavings from '../hooks/useDeviceSavings';
 
 interface Props {
-	loading: boolean;
-	deviceSavings: DeviceSavingsResponse;
+	deviceId: number;
 }
 
 const props = defineProps<Props>();
 
+const toDate = ref<Dayjs>(dayjs());
+const fromDate = ref<Dayjs>(toDate.value.subtract(30, 'day'));
+
+const {
+	data: deviceSavings,
+	isLoading,
+	isError,
+	error,
+} = useDeviceSavings(props.deviceId, {
+	to: new Date('2023-12-01'),
+	from: new Date('2023-01-01'),
+});
+
+// const { device_id, totalCarbon, totalDiesel, savingsChunk } =
+// deviceSavings.value;
+
 const carbonItem: DataItemType = {
 	title: 'Estimated Carbon Savings',
 	information: 'Sum of selected date range',
-	value: props.deviceSavings.totalCarbon,
+	value: 10, //deviceSavings.value.totalCarbon,
 	units: 'Tonnes',
 };
 
 const dieselItem: DataItemType = {
 	title: 'Estimated Diesel Savings',
 	information: 'Sum of selected date range',
-	value: props.deviceSavings.totalDiesel,
+	value: 15, //deviceSavings.value.totalDiesel,
 	units: 'Litres',
 };
 
@@ -42,24 +55,24 @@ const dieselItem: DataItemType = {
 // ]);
 // const timeScale = ref<string>('month-year');
 
-const carbonData = ref([1200, 1320, 1010, 1340, 900, 2300, 2100]);
-const dieselData = ref([2200, 1820, 1910, 2340, 2900, 3300, 3100]);
-const timeData = ref([
-	'January',
-	'February',
-	'March',
-	'April',
-	'May',
-	'June',
-	'July',
-]);
-const timeScale = ref('Monthly');
+// const carbonData = ref([1200, 1320, 1010, 1340, 900, 2300, 2100]);
+// const dieselData = ref([2200, 1820, 1910, 2340, 2900, 3300, 3100]);
+// const timeData = ref([
+// 	'January',
+// 	'February',
+// 	'March',
+// 	'April',
+// 	'May',
+// 	'June',
+// 	'July',
+// ]);
+// const timeScale = ref('Monthly');
 
-const handleZoom = (event: any) => {
-	// Handle the zoom event
-	// Fetch new data based on the zoom level or perform other actions
-	console.log('Zoom event triggered', event);
-};
+// const handleZoom = (event: any) => {
+// 	// Handle the zoom event
+// 	// Fetch new data based on the zoom level or perform other actions
+// 	console.log('Zoom event triggered', event);
+// };
 
 const updateRangeToLast30Days = () => {
 	toDate.value = dayjs();
@@ -86,8 +99,10 @@ const updateToDate = (newDate: string | Dayjs) => {
 </script>
 
 <template>
-	<div v-if="loading">Loading...</div>
+	<div v-if="isLoading">Loading...</div>
+	<div v-else-if="isError">Error: {{ error }}</div>
 	<div v-else>
+		<!-- {{ deviceSavings }} -->
 		<Flex gap="large" vertical>
 			<Flex justify="start" align="center" gap="middle">
 				<DatePicker
@@ -112,13 +127,14 @@ const updateToDate = (newDate: string | Dayjs) => {
 				<DataItem :item="dieselItem" color="secondary" />
 			</Flex>
 			<div style="width: 600px; height: 400px">
-				<SavingsBarGraph
+				{{ deviceSavings }}
+				<!-- <SavingsBarGraph
 					:carbonData="carbonData"
 					:dieselData="dieselData"
 					:timeData="timeData"
 					:timeScale="timeScale"
 					@zoom="handleZoom"
-				/>
+				/> -->
 			</div>
 		</Flex>
 	</div>

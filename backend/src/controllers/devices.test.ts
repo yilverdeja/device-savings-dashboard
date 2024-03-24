@@ -1,9 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
-import devicesRetrievalController, { DeviceWithTotalSavings } from './devices';
+import devicesRetrievalController from './devices';
 import { DataService } from '../services/dataService';
 import { Device, DeviceSaving } from '../types';
 import { savingsService } from '../services/savingsService';
 import { beforeEach } from 'node:test';
+import { DeviceResponse } from '../types';
 
 // Mock data based on the CSV file
 const mockDevices: Device[] = [
@@ -78,7 +79,7 @@ const mockSavings: DeviceSaving[] = [
 ];
 
 // Mock data based on the CSV file
-const mockDevicesWithSavings: DeviceWithTotalSavings[] = [
+const mockDevicesWithSavings: DeviceResponse[] = [
 	{
 		id: 1,
 		name: 'advenio',
@@ -138,7 +139,9 @@ describe('devicesRetrievalController', () => {
 			send: vi.fn(),
 		};
 
-		await devicesRetrievalController(dataService)(req, res);
+		const next = vi.fn();
+
+		await devicesRetrievalController(dataService)(req, res, next);
 
 		// Check if capturedJson is defined
 		expect(capturedJson).toBeDefined();
@@ -195,7 +198,7 @@ describe('devicesRetrievalController', () => {
 				includeSavings: true,
 			},
 		};
-		let capturedJson: DeviceWithTotalSavings[] | undefined;
+		let capturedJson: DeviceResponse[] | undefined;
 		const res: any = {
 			json: (data: any) => {
 				capturedJson = data;
@@ -204,7 +207,9 @@ describe('devicesRetrievalController', () => {
 			send: vi.fn(),
 		};
 
-		await devicesRetrievalController(dataService)(req, res);
+		const next = vi.fn();
+
+		await devicesRetrievalController(dataService)(req, res, next);
 
 		// Check if capturedJson is defined
 		expect(capturedJson).toBeDefined();
@@ -241,20 +246,28 @@ describe('devicesRetrievalController', () => {
 		const req: any = {
 			query: {},
 		};
-		let capturedJson: string | undefined;
+		let capturedJson: DeviceResponse[] | undefined;
 		const res: any = {
-			json: vi.fn(),
+			json: (data: any) => {
+				capturedJson = data;
+			},
 			status: vi.fn().mockReturnThis(),
 			send: vi.fn(),
 		};
 
-		await devicesRetrievalController(dataService)(req, res);
+		const next = vi.fn();
 
-		// Check if res.status was called with 503
-		expect(res.status).toHaveBeenCalledWith(503);
+		await devicesRetrievalController(dataService)(req, res, next);
 
-		// Check if res.send was called with the correct message
-		expect(res.send).toHaveBeenCalledOnce();
+		// Check if `next` was called
+		expect(next).toBeCalled();
+
+		// Check if `next` was called with a `CustomError` that has a status code of 503
+		expect(next).toHaveBeenCalledWith(
+			expect.objectContaining({
+				statusCode: 503,
+			})
+		);
 	});
 
 	it('should return a 500 status error if the savings data for the devices cannot be fetched', async () => {
@@ -286,9 +299,18 @@ describe('devicesRetrievalController', () => {
 			send: vi.fn(),
 		};
 
-		await devicesRetrievalController(dataService)(req, res);
+		const next = vi.fn();
 
-		// Check if res.status was called with 500
-		expect(res.status).toHaveBeenCalledWith(500);
+		await devicesRetrievalController(dataService)(req, res, next);
+
+		// Check if `next` was called
+		expect(next).toBeCalled();
+
+		// Check if `next` was called with a `CustomError` that has a status code of 503
+		expect(next).toHaveBeenCalledWith(
+			expect.objectContaining({
+				statusCode: 500,
+			})
+		);
 	});
 });

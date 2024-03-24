@@ -75,28 +75,6 @@ class SavingsService {
 		}
 	}
 
-	private calculateMontlyAverageMultiplier(deviceSavings: DeviceSaving[]) {
-		// assumption that a month averages at 30 days
-		const daysInAMonth = 30;
-
-		// get the minimum and maximum dates in the deviceSavings
-		const minDeviceDate = new Date(
-			Math.min(...deviceSavings.map((ds) => ds.timestamp.getTime()))
-		);
-		const maxDeviceDate = new Date(
-			Math.max(...deviceSavings.map((ds) => ds.timestamp.getTime()))
-		);
-
-		// calculate the number of days between the min and max dates
-		const daysBetweenMinMaxDates = Math.ceil(
-			Math.abs(maxDeviceDate.getTime() - minDeviceDate.getTime()) /
-				(24 * 60 * 60 * 1000)
-		); // milliseconds representation of 1 day
-
-		// average monthly = (total / days) * (num days in month) = total * (num days in a month / days )
-		return daysInAMonth / daysBetweenMinMaxDates;
-	}
-
 	private calculateTotalCarbonDieselSaved(deviceSavings: DeviceSaving[]) {
 		const totalCarbon = deviceSavings.reduce(
 			(acc, ds) => acc + ds.carbon_saved,
@@ -138,7 +116,7 @@ class SavingsService {
 		start: Date,
 		end: Date
 	) {
-		console.log(start, end);
+		// console.log(start, end);
 		let deviceSavings = dataService.getDeviceSavings() || [];
 
 		// filter by deviceId
@@ -160,6 +138,38 @@ class SavingsService {
 			this.calculateTotalCarbonDieselSaved(deviceSavings);
 
 		return { totalCarbon, totalDiesel };
+	}
+
+	public calculateMinMaxDate(deviceSavings?: DeviceSaving[]) {
+		if (!deviceSavings)
+			deviceSavings = dataService.getDeviceSavings() || [];
+		const minDate = new Date(
+			Math.min(...deviceSavings.map((ds) => ds.timestamp.getTime()))
+		);
+
+		const maxDate = new Date(
+			Math.max(...deviceSavings.map((ds) => ds.timestamp.getTime()))
+		);
+
+		return { minDate, maxDate };
+	}
+
+	private calculateMontlyAverageMultiplier(
+		deviceSavings: DeviceSaving[]
+	): number {
+		// get the minimum and maximum dates in the deviceSavings
+		const { minDate, maxDate } = this.calculateMinMaxDate(deviceSavings);
+
+		// calculate the number of days between the min and max dates
+		const daysBetweenMinMaxDates = Math.ceil(
+			(maxDate.getTime() - minDate.getTime()) / (24 * 60 * 60 * 1000) // milliseconds in one day
+		);
+
+		// assumption that a month averages at 30 days
+		const daysInAMonth = 30;
+
+		// average monthly multiplier
+		return daysInAMonth / daysBetweenMinMaxDates;
 	}
 }
 

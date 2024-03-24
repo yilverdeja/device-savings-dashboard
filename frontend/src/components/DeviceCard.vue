@@ -5,12 +5,12 @@ import { DeviceResponse } from '../types';
 defineProps<{
 	device: DeviceResponse;
 	loading: boolean;
-	onSelect: (id: number) => void;
+	onSelect: () => void;
 }>();
 </script>
 
 <template>
-	<AnchorLink @click="() => onSelect(device.id)">
+	<AnchorLink @click="onSelect">
 		<Card :title="device.name" :loading="loading" :hoverable="true">
 			<div v-if="device.totalCarbon && device.totalDiesel">
 				<Divider>Energy Savings</Divider>

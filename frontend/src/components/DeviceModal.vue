@@ -1,75 +1,74 @@
 <script setup lang="ts">
-import { Ref, ref, watch } from 'vue';
-import useDeviceSavings from '../hooks/useDeviceSavings';
-import { DataItemType, DeviceSavingsResponse } from '../types';
+import { Ref, ref } from 'vue';
+import { DataItemType, DeviceResponse } from '../types';
 import DataView from './DataView.vue';
-import DetailedDataView from './DetailedDataView.vue';
 import { Modal, Divider } from 'ant-design-vue';
 
 const props = defineProps<{
-	id: number;
+	device: DeviceResponse;
 	closeModal: () => void;
 }>();
 
-const {
-	data: deviceSavings,
-	isLoading,
-	isError,
-	error,
-} = useDeviceSavings(props.id, {});
+let totalCarbon = props.device.totalCarbon as number;
+let averageCarbon = props.device.averageCarbon as number;
+let totalDiesel = props.device.totalDiesel as number;
+let averageDiesel = props.device.averageDiesel as number;
+
+const carbonInfo: Ref<string | undefined> = ref(undefined);
+if (totalCarbon > 1000 || averageCarbon > 1000)
+	carbonInfo.value = '1 Tonne = 1,000 kg';
+
+const roundToOneDecimal = (value: number): number => {
+	return Math.round(value * 10) / 10;
+};
+
+const calculateCarbonValue = (
+	value: number
+): { value: number; units: string } => {
+	if (value > 1000) {
+		return { value: roundToOneDecimal(value / 1000), units: 'Tonnes' };
+	} else {
+		return { value: roundToOneDecimal(value), units: 'Kgs' };
+	}
+};
 
 const carbonDataItems: Ref<DataItemType[]> = ref([]);
 const dieselDataItems: Ref<DataItemType[]> = ref([]);
 
-const carbonInfo: Ref<string | undefined> = ref(undefined);
+const totalCarbonData = calculateCarbonValue(totalCarbon);
+const averageCarbonData = calculateCarbonValue(averageCarbon);
 
-watch(deviceSavings, (newDeviceSavings: DeviceSavingsResponse) => {
-	if (newDeviceSavings) {
-		let { totalCarbon, averageCarbon, totalDiesel, averageDiesel } =
-			newDeviceSavings;
+carbonDataItems.value = [
+	{
+		information: 'Total',
+		value: totalCarbonData.value,
+		units: totalCarbonData.units,
+	},
+	{
+		information: 'Month',
+		value: averageCarbonData.value,
+		units: averageCarbonData.units,
+	},
+];
 
-		if (totalCarbon > 1000 || averageCarbon > 1000)
-			carbonInfo.value = '1 Tonne = 1,000 kg';
-
-		carbonDataItems.value = [
-			{
-				information: 'Total',
-				value:
-					totalCarbon > 1000
-						? Math.round((totalCarbon / 1000) * 10) / 10
-						: Math.round(totalCarbon * 10) / 10,
-				units: totalCarbon > 1000 ? 'Tonnes' : 'Kgs',
-			},
-			{
-				information: 'Month',
-				value:
-					averageCarbon > 1000
-						? Math.round((averageCarbon / 1000) * 10) / 10
-						: Math.round(averageCarbon * 10) / 10,
-				units: averageCarbon > 1000 ? 'Tonnes' : 'Kgs',
-			},
-		];
-
-		dieselDataItems.value = [
-			{
-				information: 'Total',
-				value: Math.round(totalDiesel * 10) / 10,
-				units: 'Litres',
-			},
-			{
-				information: 'Month',
-				value: Math.round(averageDiesel * 10) / 10,
-				units: 'Litres',
-			},
-		];
-	}
-});
+dieselDataItems.value = [
+	{
+		information: 'Total',
+		value: roundToOneDecimal(totalDiesel),
+		units: 'Litres',
+	},
+	{
+		information: 'Month',
+		value: roundToOneDecimal(averageDiesel),
+		units: 'Litres',
+	},
+];
 </script>
 
 <template>
 	<Modal
 		title="Estimated Carbon Savings and Diesel Savings"
-		:open="id !== null"
+		:open="device !== null"
 		@cancel="() => closeModal()"
 		width="100%"
 		wrap-class-name="full-modal"
@@ -84,22 +83,18 @@ watch(deviceSavings, (newDeviceSavings: DeviceSavingsResponse) => {
 			title="Estimated Carbon Savings"
 			:information="carbonInfo"
 			:data-items="carbonDataItems"
-			:loading="isLoading"
+			:loading="false"
 			color="primary"
 		/>
 		<Divider></Divider>
 		<DataView
 			title="Estimated Diesel Savings"
 			:data-items="dieselDataItems"
-			:loading="isLoading"
+			:loading="false"
 			color="secondary"
 		/>
 		<Divider></Divider>
-		<DetailedDataView
-			v-if="deviceSavings"
-			:loading="isLoading"
-			:device-savings="deviceSavings"
-		/>
+		<DetailedDataView :device-id="device.id" />
 	</Modal>
 </template>
 

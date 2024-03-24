@@ -4,6 +4,7 @@ import { ref, computed } from 'vue';
 import DeviceCard from './components/DeviceCard.vue';
 import DeviceModal from './components/DeviceModal.vue';
 import useDevices from './hooks/useDevices';
+import { DeviceResponse } from './types';
 
 const includeSavings = ref(true);
 const {
@@ -15,17 +16,18 @@ const {
 	includeSavings: includeSavings.value,
 });
 
-const selectedDevice = ref<number | null>(null);
+const selectedDevice = ref<DeviceResponse | null>(null);
 
-const openDeviceInformation = (deviceId: number) => {
-	selectedDevice.value = deviceId;
+const openDeviceInformation = (device: DeviceResponse) => {
+	selectedDevice.value = device;
+	console.log(selectedDevice.value);
 };
 
 const removeSelectedDevice = () => {
 	selectedDevice.value = null;
 };
 
-const isModalOpen = computed(() => typeof selectedDevice.value === 'number');
+const isModalOpen = computed(() => selectedDevice.value !== null);
 </script>
 
 <template>
@@ -34,7 +36,7 @@ const isModalOpen = computed(() => typeof selectedDevice.value === 'number');
 		<Divider orientation="left">Devices</Divider>
 		<DeviceModal
 			v-if="isModalOpen"
-			:id="selectedDevice"
+			:device="selectedDevice"
 			:closeModal="removeSelectedDevice"
 		/>
 		<div v-if="isLoading">Loading...</div>
@@ -45,7 +47,7 @@ const isModalOpen = computed(() => typeof selectedDevice.value === 'number');
 					<DeviceCard
 						:device="device"
 						:loading="false"
-						:onSelect="openDeviceInformation"
+						:onSelect="() => openDeviceInformation(device)"
 					/>
 				</Col>
 			</Row>
