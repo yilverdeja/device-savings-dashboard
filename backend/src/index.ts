@@ -2,8 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import checkDataLoaded from './middlewares/checkDataLoaded';
 import { DataService } from './services/dataService';
-import deviceRouter from './routes/devices';
-import savingsRouter from './routes/savings';
+import deviceRouter from './routes/devicesRoute';
+import savingsRouter from './routes/savingsRoute';
 import { errorHandler } from './middlewares/errors';
 
 // create an express app

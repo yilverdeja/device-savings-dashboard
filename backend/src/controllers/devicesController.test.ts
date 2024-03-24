@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import devicesRetrievalController from './devices';
+import devicesRetrievalController from './devicesController';
 import { DataService } from '../services/dataService';
 import { Device, DeviceSaving } from '../types';
 import { savingsService } from '../services/savingsService';

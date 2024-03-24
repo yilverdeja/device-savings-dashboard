@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { DataService } from '../services/dataService';
-import deviceSavingsRetrievalController from '../controllers/savings';
-import validateGetDeviceSavings from '../validators/savings';
+import deviceSavingsRetrievalController from '../controllers/savingsController';
+import validateGetDeviceSavings from '../validators/savingsValidator';
 
 const router = Router();
 const dataService = DataService.getInstance();

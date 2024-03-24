@@ -1,4 +1,4 @@
-import { TotalSavingsData, savingsService } from './../services/savingsService';
+import { TotalSavingsData, savingsService } from '../services/savingsService';
 import { DataService } from '../services/dataService';
 import { DeviceResponse } from '../types';
 import { NextFunction, Request, Response } from 'express';
