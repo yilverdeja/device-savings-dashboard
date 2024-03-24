@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { Flex, Button, DatePicker } from 'ant-design-vue';
+import {
+	Flex,
+	Button,
+	DatePicker,
+	RadioGroup,
+	RadioButton,
+} from 'ant-design-vue';
 import { computed, ref, Ref, watch } from 'vue';
 import dayjs, { Dayjs } from 'dayjs';
 import SavingsBarGraph from './SavingsBarGraph.vue';
@@ -163,7 +169,11 @@ function processSavingsChunks(savingsChunks: SavingsChunk[]) {
 		newCarbonData.push(value);
 		newDieselData.push(roundToOneDecimal(chunk.totalDiesel / 1000));
 		// Assuming 'from' is the start date of the month
-		newTimeData.push(dayjs(chunk.from).format('MMMM')); // Formats date as the month name
+		if (resolution.value === 'month') {
+			newTimeData.push(dayjs(chunk.from).format('MMMM'));
+		} else {
+			newTimeData.push(dayjs(chunk.from).format('MMM D'));
+		}
 	}
 
 	// Update the reactive references with the new data
@@ -171,12 +181,6 @@ function processSavingsChunks(savingsChunks: SavingsChunk[]) {
 	dieselData.value = newDieselData;
 	timeData.value = newTimeData;
 }
-
-const handleZoom = (event: any) => {
-	// Handle the zoom event
-	// Fetch new data based on the zoom level or perform other actions
-	// console.log('Zoom event triggered', event);
-};
 
 const updateRangeToLast30Days = () => {
 	toDate.value = dayjs();
@@ -200,6 +204,10 @@ const updateFromDate = (newDate: string | Dayjs) => {
 const updateToDate = (newDate: string | Dayjs) => {
 	toDate.value = newDate as Dayjs;
 };
+
+const updateResolution = (newResolution: DeviceSavingsResolution) => {
+	resolution.value = newResolution;
+};
 </script>
 
 <template>
@@ -219,10 +227,27 @@ const updateToDate = (newDate: string | Dayjs) => {
 				@change="updateToDate"
 			/>
 		</Flex>
-		<Flex justify="start" align="center" gap="middle">
-			<Button @click="updateRangeToLast30Days">Last 30 Days</Button>
-			<Button @click="updateRangeToLast60Days">Last 60 Days</Button>
-			<Button @click="updateRangeToLastYear">Last year</Button>
+		<Flex justify="space-between" align="center" gap="middle">
+			<Flex justify="start" align="center" gap="middle">
+				<Button @click="updateRangeToLast30Days">Last 30 Days</Button>
+				<Button @click="updateRangeToLast60Days">Last 60 Days</Button>
+				<Button @click="updateRangeToLastYear">Last year</Button>
+			</Flex>
+			<Flex justify="start" align="center" gap="middle">
+				<RadioGroup :value="resolution">
+					<RadioButton
+						@click="updateResolution('month')"
+						value="month"
+						>Month</RadioButton
+					>
+					<RadioButton @click="updateResolution('week')" value="week"
+						>Week</RadioButton
+					>
+					<RadioButton @click="updateResolution('day')" value="day"
+						>Day</RadioButton
+					>
+				</RadioGroup>
+			</Flex>
 		</Flex>
 		<div v-if="isLoading">Loading...</div>
 		<div v-else-if="isError">Unable to retrieve the data in that range</div>
@@ -233,13 +258,11 @@ const updateToDate = (newDate: string | Dayjs) => {
 			</Flex>
 			<Flex justify="center" align="center">
 				<div style="width: 600px; height: 400px">
-					<!-- {{ deviceSavings }} -->
 					<SavingsBarGraph
 						:carbonData="carbonData"
 						:dieselData="dieselData"
 						:timeData="timeData"
 						:timeScale="timeScale"
-						@zoom="handleZoom"
 					/>
 				</div>
 			</Flex>

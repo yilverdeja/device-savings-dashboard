@@ -3,7 +3,6 @@
 		ref="chartRef"
 		:option="chartOptions"
 		@finished="onChartFinished"
-		@datazoom="onDataZoom"
 		:autoresize="true"
 	/>
 </template>
@@ -109,15 +108,31 @@ const createChartOptions = () => {
 		],
 		dataZoom: [
 			{
-				type: 'inside',
+				type: 'inside', // Enable zooming inside the chart using the mouse wheel
+				start: 0,
+				end: 100,
+				zoomOnMouseWheel: true, // Enable zoom on mouse wheel
+				minSpan: 0, // Limit the minimum range to 10%
+				maxSpan: 100, // Limit the maximum range to 100%
+			},
+			{
+				type: 'slider', // Additional slider dataZoom for user interface
 				start: 0,
 				end: 100,
 			},
-			{
-				start: 0,
-				end: 10,
-			},
+			// ... other configuration for dataZoom
 		],
+		// dataZoom: [
+		// 	{
+		// 		type: 'inside',
+		// 		start: 0,
+		// 		end: 100,
+		// 	},
+		// 	{
+		// 		start: 0,
+		// 		end: 10,
+		// 	},
+		// ],
 	};
 };
 
@@ -163,12 +178,6 @@ watch(
 		createChartOptions();
 	}
 );
-
-// Event handler for when the data zoom event is triggered
-const onDataZoom = (event: any) => {
-	// Emit the zoom event to the parent component
-	emit('zoom', event);
-};
 </script>
 
 <style scoped>
