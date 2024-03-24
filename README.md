@@ -1,6 +1,6 @@
 # Device Savings Dashboard
 
-<!-- Add images here -->
+![image](https://github.com/yilverdeja/c3c3aa95-fb85-4a34-8439-339c8a12fcd2/assets/29952939/457cfec9-db50-4d6a-b96e-3c340f0540f0)
 
 ## About
 
@@ -162,13 +162,13 @@ When the server starts, you can start retrieving data from it after seeing the `
 
 ### Devices
 
-<!-- Devices -->
+![image](https://github.com/yilverdeja/c3c3aa95-fb85-4a34-8439-339c8a12fcd2/assets/29952939/a97729d1-c5f4-42bc-bd33-58d06757c22f)
 
 When the client application starts, it fetches the `/devices` information on the backend with the additional `includeSavings` query. Admins can see the device names, in addition to an overview of the device savings and the timezone information.
 
 ### Device Savings - Overview
 
-<!-- Device Savings Overview -->
+![image](https://github.com/yilverdeja/c3c3aa95-fb85-4a34-8439-339c8a12fcd2/assets/29952939/c13494f2-2cf8-4b9f-853c-17cf67b39539)
 
 Selecting a device card will open up a modal with more in-depth information about the device savings like the `total` and `monthly average` `carbon savings` and `diesel savings`.
 
@@ -176,7 +176,7 @@ If any of the carbon savings information is under 1000kg's, then the unit will c
 
 ### Device Savings - Details
 
-<!-- Device Savings Details -->
+![image](https://github.com/yilverdeja/c3c3aa95-fb85-4a34-8439-339c8a12fcd2/assets/29952939/b0854d35-5b0e-4c9b-bbd7-4fcf042a5a94)
 
 Users can view the device savings from a specific time range. On startup, it's hardcoded to January to December of 2023 as that is the range in the `.csv` data files.
 
