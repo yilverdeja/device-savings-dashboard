@@ -73,7 +73,9 @@ npm run dev
 
 This will start a web server on an availale port
 
-## Endpoints
+## Backend - Endpoints
+
+The data in the backend is kept in the .csv files within the `src/data` directory and loaded onto the server on startup.
 
 ### Get Devices with Optional Savings Information
 
@@ -143,6 +145,43 @@ The error response is structured below:
 -   `message`: string;
 -   `details` (optional): any;
 
-## Notes & Improvements
+### Endpoint Tests
 
-Loading...
+When the server starts, you can start retrieving data from it after seeing the `CSV data loaded successfully` message on the server console. Attempting to retrieve data from it will return an internal server error JSON that the data hasn't loaded.
+
+-   `curl "http://localhost:5000/devices"`
+    -   returns a list of devices each with device_id, name, and timezone info
+-   `curl "http://localhost:5000/devices?includeSavings=true"`
+    -   returns same as above but with totalCarbon, averageCarbon, totalDiesel and averageDiesel info
+-   `curl "http://localhost:5000/savings/:device_id"`
+    -   `device_id` is an available device_id on that can be found on `/devices`
+    -   returns the device_id, with the totalCarbon and totalDiesel in it's lifespan. In addition, with a default of Jan to Dec 2023 at a monthly resolution, it should return an array of 12 chunks
+    -   each chunk has the from date, the to date, the totalCarbon saved and the totalDiesel saved
+
+## Frontend - UI
+
+### Devices
+
+<!-- Devices -->
+
+When the client application starts, it fetches the `/devices` information on the backend with the additional `includeSavings` query. Admins can see the device names, in addition to an overview of the device savings and the timezone information.
+
+### Device Savings - Overview
+
+<!-- Device Savings Overview -->
+
+Selecting a device card will open up a modal with more in-depth information about the device savings like the `total` and `monthly average` `carbon savings` and `diesel savings`.
+
+If any of the carbon savings information is under 1000kg's, then the unit will change from `tonnes` to `kgs`.
+
+### Device Savings - Details
+
+<!-- Device Savings Details -->
+
+Users can view the device savings from a specific time range. On startup, it's hardcoded to January to December of 2023 as that is the range in the `.csv` data files.
+
+Selecting the `Last 30 Days`, `Last 60 Days` or `Last Year` buttons will update the range with an end date to the current date (i.e. 2024 - this year) and the start date will update accordingly. Since the data does not exist in the .csv file provided, the data will not be loaded into the graph.
+
+In addition, I've added a `Month`, `Week` and `Day` selector to choose the resolution of the data retrieved. If it's set to month, the date range will be split into monthly chunks. If weeks then weekly chunks, and day into daily chunks. The graph will update accordingly.
+
+The graph can be zoomed in and out, but it will not change the resolution of the data shown.
