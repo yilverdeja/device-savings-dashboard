@@ -1,43 +1,35 @@
 <script setup lang="ts">
-import { Ref, ref } from 'vue';
+import { calculateCarbonValue, roundToOneDecimal } from '../utils/helpers';
 import { DataItemType, DeviceResponse } from '../types';
-import DataView from './DataView.vue';
 import { Modal, Divider } from 'ant-design-vue';
+import { Ref, ref } from 'vue';
+import DataView from './DataView.vue';
 
-const props = defineProps<{
+interface Props {
 	device: DeviceResponse;
 	closeModal: () => void;
-}>();
+}
 
-let totalCarbon = props.device.totalCarbon as number;
-let averageCarbon = props.device.averageCarbon as number;
-let totalDiesel = props.device.totalDiesel as number;
-let averageDiesel = props.device.averageDiesel as number;
+const props = defineProps<Props>();
+
+// reactive variables
+const totalCarbon: Ref<number> = ref(props.device.totalCarbon as number);
+const averageCarbon: Ref<number> = ref(props.device.averageCarbon as number);
+const totalDiesel: Ref<number> = ref(props.device.totalDiesel as number);
+const averageDiesel: Ref<number> = ref(props.device.averageDiesel as number);
 
 const carbonInfo: Ref<string | undefined> = ref(undefined);
-if (totalCarbon > 1000 || averageCarbon > 1000)
+if (totalCarbon.value > 1000 || averageCarbon.value > 1000)
 	carbonInfo.value = '1 Tonne = 1,000 kg';
-
-const roundToOneDecimal = (value: number): number => {
-	return Math.round(value * 10) / 10;
-};
-
-const calculateCarbonValue = (
-	value: number
-): { value: number; units: string } => {
-	if (value > 1000) {
-		return { value: roundToOneDecimal(value / 1000), units: 'Tonnes' };
-	} else {
-		return { value: roundToOneDecimal(value), units: 'Kgs' };
-	}
-};
 
 const carbonDataItems: Ref<DataItemType[]> = ref([]);
 const dieselDataItems: Ref<DataItemType[]> = ref([]);
 
-const totalCarbonData = calculateCarbonValue(totalCarbon);
-const averageCarbonData = calculateCarbonValue(averageCarbon);
+// formatted data
+const totalCarbonData = calculateCarbonValue(totalCarbon.value);
+const averageCarbonData = calculateCarbonValue(averageCarbon.value);
 
+// data items
 carbonDataItems.value = [
 	{
 		information: 'Total',
@@ -54,12 +46,12 @@ carbonDataItems.value = [
 dieselDataItems.value = [
 	{
 		information: 'Total',
-		value: roundToOneDecimal(totalDiesel),
+		value: roundToOneDecimal(totalDiesel.value),
 		units: 'Litres',
 	},
 	{
 		information: 'Month',
-		value: roundToOneDecimal(averageDiesel),
+		value: roundToOneDecimal(averageDiesel.value),
 		units: 'Litres',
 	},
 ];
@@ -67,14 +59,14 @@ dieselDataItems.value = [
 
 <template>
 	<Modal
-		title="Estimated Carbon Savings and Diesel Savings"
+		:footer="null"
 		:open="device !== null"
 		@cancel="() => closeModal()"
+		title="Estimated Carbon Savings and Diesel Savings"
 		width="100%"
 		wrap-class-name="full-modal"
-		:footer="null"
 	>
-		<p style="color: darkcyan; font-weight: bold">
+		<p class="modal-info">
 			Download general guidelines on the estimated carbon & diesel saving
 			calculations
 		</p>
@@ -129,5 +121,10 @@ dieselDataItems.value = [
 .full-modal .ant-modal-body {
 	padding: 30px;
 	flex: 1;
+}
+
+.modal-info {
+	color: darkcyan;
+	font-weight: bold;
 }
 </style>

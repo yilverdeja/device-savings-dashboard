@@ -2,6 +2,7 @@
 import { Flex } from 'ant-design-vue';
 import { InfoCircleOutlined } from '@ant-design/icons-vue';
 import { DataItemType } from '../types';
+import { computed } from 'vue';
 
 interface Props {
 	item: DataItemType;
@@ -10,33 +11,34 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const textColorStyle = () => {
-	if (props.color === 'primary') return 'text--primary';
-	if (props.color === 'secondary') return 'text--secondary';
-	return '';
-};
+const textColorClass = computed(() => {
+	return {
+		'text--primary': props.color === 'primary',
+		'text--secondary': props.color === 'secondary',
+	};
+});
 </script>
 
 <template>
-	<!-- consider using dl definition items for better markup -->
 	<Flex justify="center" align="center" gap="small" vertical>
-		<p v-if="item.title" class="text title">{{ item.title }}</p>
-		<Flex
-			justify="space-evenly"
-			align="center"
-			gap="small"
-			class="information"
-		>
-			<p class="text">
-				{{ item.information }}
-			</p>
-			<InfoCircleOutlined class="" />
-		</Flex>
-		<p class="text value" :class="textColorStyle()">
-			<div v-if="item.value">{{ item.value.toLocaleString() }}</div>
-			<div v-else>...</div>
-		</p>
-		<p class="text units" :class="textColorStyle()">{{ item.units }}</p>
+		<dl class="data-item">
+			<dt v-if="item.title" class="text title">{{ item.title }}</dt>
+			<dd class="information">
+				<Flex justify="space-evenly" align="center" gap="small">
+					<span>{{ item.information }}</span>
+					<InfoCircleOutlined />
+				</Flex>
+			</dd>
+			<dd class="value-units" :class="textColorClass">
+				<div class="text value">
+					<span v-if="item.value">{{
+						item.value.toLocaleString()
+					}}</span>
+					<span v-else>...</span>
+				</div>
+				<div class="text units">{{ item.units }}</div>
+			</dd>
+		</dl>
 	</Flex>
 </template>
 
@@ -69,5 +71,15 @@ const textColorStyle = () => {
 
 .units {
 	font-weight: bold;
+}
+
+.data-item {
+	display: block;
+}
+
+.value-units {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }
 </style>

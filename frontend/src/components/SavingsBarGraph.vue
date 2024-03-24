@@ -1,22 +1,9 @@
 <template>
-	<v-chart
-		ref="chartRef"
-		:option="chartOptions"
-		@finished="onChartFinished"
-		:autoresize="true"
-	/>
+	<v-chart ref="chartRef" :option="chartOptions" :autoresize="true" />
 </template>
 
 <script setup lang="ts">
-import {
-	ref,
-	watch,
-	onMounted,
-	defineProps,
-	defineEmits,
-	nextTick,
-	onUnmounted,
-} from 'vue';
+import { ref, watch, onMounted, defineProps, onUnmounted } from 'vue';
 import VChart from 'vue-echarts';
 import { ECharts, use } from 'echarts/core';
 
@@ -47,10 +34,8 @@ const props = defineProps<{
 	timeScale: string;
 }>();
 
-// Define emits
-const emit = defineEmits(['zoom']);
-
 // Setup the chart options
+const chartRef = ref<ECharts | null>(null);
 const chartOptions = ref({});
 
 const createChartOptions = () => {
@@ -120,55 +105,25 @@ const createChartOptions = () => {
 				start: 0,
 				end: 100,
 			},
-			// ... other configuration for dataZoom
 		],
-		// dataZoom: [
-		// 	{
-		// 		type: 'inside',
-		// 		start: 0,
-		// 		end: 100,
-		// 	},
-		// 	{
-		// 		start: 0,
-		// 		end: 10,
-		// 	},
-		// ],
 	};
 };
 
-// Event handler for when chart rendering is finished
-const onChartFinished = () => {
-	// console.log('chart finished');
-	// The chart rendering is finished, you can perform actions here if necessary
-	// For example, fetching new data based on zoom level
+// Define the resize handler for the onMounted and onUnmounted lifecycle hooks
+const handleResize = () => {
+	if (chartRef.value) {
+		chartRef.value.resize();
+	}
 };
 
-const chartRef = ref<ECharts | null>(null);
-
-onMounted(async () => {
-	await nextTick(); // Ensure the DOM is updated
+onMounted(() => {
 	createChartOptions();
 
-	// Here we add a resize listener to handle window resize events
-	const handleResize = () => {
-		if (chartRef.value) {
-			chartRef.value.resize();
-		}
-	};
-
 	window.addEventListener('resize', handleResize);
-
-	// Optional: immediately invoke the resize handler to ensure proper sizing
-	handleResize();
 });
 
 onUnmounted(() => {
-	// Remove the resize listener when the component is unmounted
-	window.removeEventListener('resize', () => {
-		if (chartRef.value) {
-			chartRef.value.resize();
-		}
-	});
+	window.removeEventListener('resize', handleResize);
 });
 
 // Watch for changes in props and update the chart
@@ -180,6 +135,4 @@ watch(
 );
 </script>
 
-<style scoped>
-/* Add any styles for your component here */
-</style>
+<style scoped></style>

@@ -6,20 +6,19 @@ import {
 	RadioGroup,
 	RadioButton,
 } from 'ant-design-vue';
-import { computed, ref, Ref, watch } from 'vue';
-import dayjs, { Dayjs } from 'dayjs';
-import SavingsBarGraph from './SavingsBarGraph.vue';
-// import useDeviceSavings from '../hooks/useDeviceSavings';
 import {
 	DataItemType,
 	SavingsChunk,
 	DeviceSavingsRequest,
 	DeviceSavingsResolution,
 } from '../types';
-
+import { calculateCarbonValue, roundToOneDecimal } from '../utils/helpers';
+import { computed, ref, Ref, watch } from 'vue';
+import { DeviceSavingsResponse } from '../types';
 import { useQuery } from '@tanstack/vue-query';
 import APIClient from '../services/api-client';
-import { DeviceSavingsResponse } from '../types';
+import dayjs, { Dayjs } from 'dayjs';
+import SavingsBarGraph from './SavingsBarGraph.vue';
 
 const apiClient = new APIClient<DeviceSavingsResponse>('/savings');
 
@@ -31,11 +30,11 @@ const props = defineProps<Props>();
 
 const toDate = ref<Dayjs>(dayjs());
 const fromDate = ref<Dayjs>(toDate.value.subtract(30, 'day'));
+const resolution = ref<DeviceSavingsResolution>('month');
 
-// Hardcoded values for testing
+// TODO: Remove... Hardcoded values for testing
 toDate.value = dayjs(new Date('2023-12-31'));
 fromDate.value = dayjs(new Date('2023-01-01'));
-const resolution = ref<DeviceSavingsResolution>('month');
 
 // Create a reactive params object using computed
 const params: Ref<DeviceSavingsRequest> = computed(() => ({
@@ -44,6 +43,7 @@ const params: Ref<DeviceSavingsRequest> = computed(() => ({
 	resolution: resolution.value,
 }));
 
+// import useDeviceSavings from '../hooks/useDeviceSavings';
 // TODO: Not working...
 // const {
 // 	data: deviceSavings,
@@ -53,11 +53,11 @@ const params: Ref<DeviceSavingsRequest> = computed(() => ({
 // 	refetch,
 // } = useDeviceSavings(props.deviceId, params.value);
 
+// Fetch Data from Device Savings
 const {
 	data: deviceSavings,
 	isLoading,
 	isError,
-	error,
 	refetch,
 } = useQuery({
 	queryKey: [
@@ -76,6 +76,7 @@ const {
 			},
 		});
 	},
+	staleTime: 1000 * 60 * 60 * 24, // 24 hours
 });
 
 watch(
@@ -87,20 +88,6 @@ watch(
 		deep: true, // ensures the watcher will trigger even for nested property changes
 	}
 );
-
-const roundToOneDecimal = (value: number): number => {
-	return Math.round(value * 10) / 10;
-};
-
-const calculateCarbonValue = (
-	value: number
-): { value: number; units: string } => {
-	if (value > 1000) {
-		return { value: roundToOneDecimal(value / 1000), units: 'Tonnes' };
-	} else {
-		return { value: roundToOneDecimal(value), units: 'Kgs' };
-	}
-};
 
 // Computed property for carbon savings, updates when deviceSavings changes
 const carbonItem = computed(() => {
@@ -149,7 +136,7 @@ const timeScale = ref<string>('month');
 // Watch the deviceSavings for changes and update the arrays accordingly
 watch(
 	deviceSavings,
-	(newValue, oldValue) => {
+	(newValue) => {
 		if (newValue) {
 			processSavingsChunks(newValue.savingsChunks);
 		}
@@ -157,7 +144,7 @@ watch(
 	{ immediate: true }
 );
 
-function processSavingsChunks(savingsChunks: SavingsChunk[]) {
+const processSavingsChunks = (savingsChunks: SavingsChunk[]) => {
 	const newCarbonData: number[] = [];
 	const newDieselData: number[] = [];
 	const newTimeData: string[] = [];
@@ -180,8 +167,9 @@ function processSavingsChunks(savingsChunks: SavingsChunk[]) {
 	carbonData.value = newCarbonData;
 	dieselData.value = newDieselData;
 	timeData.value = newTimeData;
-}
+};
 
+// utilities
 const updateRangeToLast30Days = () => {
 	toDate.value = dayjs();
 	fromDate.value = toDate.value.subtract(30, 'day');

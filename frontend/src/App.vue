@@ -1,33 +1,31 @@
 <script setup lang="ts">
+import { DeviceResponse } from './types';
+import { ref } from 'vue';
 import { TypographyTitle, Divider, Row, Col, Flex } from 'ant-design-vue';
-import { ref, computed } from 'vue';
 import DeviceCard from './components/DeviceCard.vue';
 import DeviceModal from './components/DeviceModal.vue';
 import useDevices from './hooks/useDevices';
-import { DeviceResponse } from './types';
 
-const includeSavings = ref(true);
+// get devices data from api
 const {
 	data: devices,
 	isLoading,
 	isError,
 	error,
 } = useDevices({
-	includeSavings: includeSavings.value,
+	includeSavings: true,
 });
 
 const selectedDevice = ref<DeviceResponse | null>(null);
 
-const openDeviceInformation = (device: DeviceResponse) => {
+// select device event handlers
+const selectDevice = (device: DeviceResponse) => {
 	selectedDevice.value = device;
-	console.log(selectedDevice.value);
 };
 
 const removeSelectedDevice = () => {
 	selectedDevice.value = null;
 };
-
-const isModalOpen = computed(() => selectedDevice.value !== null);
 </script>
 
 <template>
@@ -35,7 +33,7 @@ const isModalOpen = computed(() => selectedDevice.value !== null);
 		<TypographyTitle>Energy Savings Dashboard</TypographyTitle>
 		<Divider orientation="left">Devices</Divider>
 		<DeviceModal
-			v-if="isModalOpen"
+			v-if="selectedDevice"
 			:device="selectedDevice"
 			:closeModal="removeSelectedDevice"
 		/>
@@ -47,7 +45,7 @@ const isModalOpen = computed(() => selectedDevice.value !== null);
 					<DeviceCard
 						:device="device"
 						:loading="false"
-						:onSelect="() => openDeviceInformation(device)"
+						:onSelect="() => selectDevice(device)"
 					/>
 				</Col>
 			</Row>
