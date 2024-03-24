@@ -104,7 +104,8 @@ class SavingsService {
 			this.calculateTotalCarbonDieselSaved(deviceSavings);
 
 		// calculate the total monthly average based on the min and max dates
-		const multiplier = this.calculateMontlyAverageMultiplier(deviceSavings);
+		const multiplier =
+			this.calculateMonthlyAverageMultiplier(deviceSavings);
 		const averageCarbon = totalCarbon * multiplier;
 		const averageDiesel = totalDiesel * multiplier;
 
@@ -116,7 +117,6 @@ class SavingsService {
 		start: Date,
 		end: Date
 	) {
-		// console.log(start, end);
 		let deviceSavings = dataService.getDeviceSavings() || [];
 
 		// filter by deviceId
@@ -154,7 +154,7 @@ class SavingsService {
 		return { minDate, maxDate };
 	}
 
-	private calculateMontlyAverageMultiplier(
+	private calculateMonthlyAverageMultiplier(
 		deviceSavings: DeviceSaving[]
 	): number {
 		// get the minimum and maximum dates in the deviceSavings
@@ -169,6 +169,7 @@ class SavingsService {
 		const daysInAMonth = 30;
 
 		// average monthly multiplier
+		if (daysBetweenMinMaxDates <= 0) return 0;
 		return daysInAMonth / daysBetweenMinMaxDates;
 	}
 }
