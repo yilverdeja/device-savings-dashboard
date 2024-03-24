@@ -133,17 +133,6 @@ const dieselData = ref<number[]>([]);
 const timeData = ref<string[]>([]);
 const timeScale = ref<string>('month');
 
-// Watch the deviceSavings for changes and update the arrays accordingly
-watch(
-	deviceSavings,
-	(newValue) => {
-		if (newValue) {
-			processSavingsChunks(newValue.savingsChunks);
-		}
-	},
-	{ immediate: true }
-);
-
 const processSavingsChunks = (savingsChunks: SavingsChunk[]) => {
 	const newCarbonData: number[] = [];
 	const newDieselData: number[] = [];
@@ -168,6 +157,17 @@ const processSavingsChunks = (savingsChunks: SavingsChunk[]) => {
 	dieselData.value = newDieselData;
 	timeData.value = newTimeData;
 };
+
+// Watch the deviceSavings for changes and update the arrays accordingly
+watch(
+	deviceSavings,
+	(newValue) => {
+		if (newValue) {
+			processSavingsChunks(newValue.savingsChunks);
+		}
+	},
+	{ immediate: true }
+);
 
 // utilities
 const updateRangeToLast30Days = () => {
