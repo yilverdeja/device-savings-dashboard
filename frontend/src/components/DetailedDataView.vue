@@ -106,12 +106,14 @@ const updateToDate = (newDate: string | Dayjs) => {
 		<Flex gap="large" vertical>
 			<Flex justify="start" align="center" gap="middle">
 				<DatePicker
+					show-time
 					style="flex-grow: 1"
 					:value="fromDate"
 					@change="updateFromDate"
 				/>
 				<div style="font-weight: bold; font-size: x-large">-</div>
 				<DatePicker
+					show-time
 					style="flex-grow: 1"
 					:value="toDate"
 					@change="updateToDate"
