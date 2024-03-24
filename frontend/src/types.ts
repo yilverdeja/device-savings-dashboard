@@ -2,7 +2,7 @@
 export interface DataItemType {
 	title?: string;
 	information?: string;
-	value: number;
+	value: number | null;
 	units: string;
 }
 

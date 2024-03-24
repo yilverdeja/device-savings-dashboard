@@ -75,10 +75,10 @@ const deviceSavingsRetrievalController =
 		});
 
 		try {
-			// try to get the cached device data
-
 			const { totalCarbon, totalDiesel } =
 				savingsService.calculateTotalSavedInRange(id, fromDate, toDate);
+
+			console.log(totalCarbon, totalDiesel, fromDate, toDate);
 
 			// get total energy savings per chunk range
 			const data = dateChunks.map((chunk) => {
@@ -103,8 +103,9 @@ const deviceSavingsRetrievalController =
 			});
 		} catch (error) {
 			let errorMessage;
+			if (error instanceof CustomError) return next(error);
 			if (error instanceof Error) errorMessage = error.message;
-			next(
+			return next(
 				new CustomError(
 					500,
 					errorMessage || 'Error fetching device savings data',

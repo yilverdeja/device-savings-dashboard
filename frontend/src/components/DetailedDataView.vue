@@ -1,12 +1,10 @@
 <script setup lang="ts">
-// import { DeviceSavingsResponse, DataItemType } from '../types.ts';
 import { Flex, Button, DatePicker } from 'ant-design-vue';
-import { ref } from 'vue';
+import { computed, ref, watchEffect, Ref } from 'vue';
 import dayjs, { Dayjs } from 'dayjs';
-
-// import DataItem from './DataItem.vue';
 // import SavingsBarGraph from './SavingsBarGraph.vue';
 import useDeviceSavings from '../hooks/useDeviceSavings';
+import { DataItemType } from '../types';
 
 interface Props {
 	deviceId: number;
@@ -17,32 +15,72 @@ const props = defineProps<Props>();
 const toDate = ref<Dayjs>(dayjs());
 const fromDate = ref<Dayjs>(toDate.value.subtract(30, 'day'));
 
+// Hardcoded values for testing
+toDate.value = dayjs(new Date('2023-12-01'));
+fromDate.value = dayjs(new Date('2023-11-29'));
+
 const {
 	data: deviceSavings,
 	isLoading,
 	isError,
 	error,
 } = useDeviceSavings(props.deviceId, {
-	to: new Date('2023-12-01'),
-	from: new Date('2023-01-01'),
+	to: toDate.value.toDate(),
+	from: fromDate.value.toDate(),
 });
 
-// const { device_id, totalCarbon, totalDiesel, savingsChunk } =
-// deviceSavings.value;
-
-const carbonItem: DataItemType = {
-	title: 'Estimated Carbon Savings',
-	information: 'Sum of selected date range',
-	value: 10, //deviceSavings.value.totalCarbon,
-	units: 'Tonnes',
+const roundToOneDecimal = (value: number): number => {
+	return Math.round(value * 10) / 10;
 };
 
-const dieselItem: DataItemType = {
-	title: 'Estimated Diesel Savings',
-	information: 'Sum of selected date range',
-	value: 15, //deviceSavings.value.totalDiesel,
-	units: 'Litres',
+const calculateCarbonValue = (
+	value: number
+): { value: number; units: string } => {
+	if (value > 1000) {
+		return { value: roundToOneDecimal(value / 1000), units: 'Tonnes' };
+	} else {
+		return { value: roundToOneDecimal(value), units: 'Kgs' };
+	}
 };
+
+// Computed property for carbon savings, updates when deviceSavings changes
+const carbonItem = computed(() => {
+	if (isLoading.value || !deviceSavings.value) {
+		return {
+			title: 'Estimated Carbon Savings',
+			information: 'Sum of selected date range',
+			value: null,
+			units: '',
+		} as DataItemType;
+	}
+	const { units: carbonUnit, value: carbonValue } = calculateCarbonValue(
+		roundToOneDecimal(deviceSavings.value.totalCarbon)
+	);
+	return {
+		title: 'Estimated Carbon Savings',
+		information: 'Sum of selected date range',
+		value: carbonValue,
+		units: carbonUnit,
+	} as DataItemType;
+});
+
+// Computed property for diesel savings, updates when deviceSavings changes
+const dieselItem = computed(() => {
+	if (isLoading.value || !deviceSavings.value) {
+		return {
+			title: 'Estimated Diesel Savings',
+			information: 'Sum of selected date range',
+			value: null,
+			units: '',
+		} as DataItemType;
+	}
+	return {
+		title: 'Estimated Diesel Savings',
+		information: 'Sum of selected date range',
+		value: roundToOneDecimal(deviceSavings.value.totalDiesel),
+		units: 'Litres',
+	} as DataItemType;
+});
 
 // const carbonData = ref<number[]>([
 // 	/* ... */

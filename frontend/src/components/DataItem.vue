@@ -33,7 +33,8 @@ const textColorStyle = () => {
 			<InfoCircleOutlined class="" />
 		</Flex>
 		<p class="text value" :class="textColorStyle()">
-			{{ item.value.toLocaleString() }}
+			<div v-if="item.value">{{ item.value.toLocaleString() }}</div>
+			<div v-else>...</div>
 		</p>
 		<p class="text units" :class="textColorStyle()">{{ item.units }}</p>
 	</Flex>
