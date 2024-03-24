@@ -79,13 +79,19 @@ const createChartOptions = () => {
 		yAxis: [
 			{
 				type: 'value',
-				name: 'kgs',
+				name: 'tonnes',
 				position: 'left',
+				axisLabel: {
+					formatter: '{value}',
+				},
 			},
 			{
 				type: 'value',
 				name: 'litres',
 				position: 'right',
+				axisLabel: {
+					formatter: '{value}k',
+				},
 			},
 		],
 		series: [
@@ -117,7 +123,7 @@ const createChartOptions = () => {
 
 // Event handler for when chart rendering is finished
 const onChartFinished = () => {
-	console.log('chart finished');
+	// console.log('chart finished');
 	// The chart rendering is finished, you can perform actions here if necessary
 	// For example, fetching new data based on zoom level
 };

@@ -1,10 +1,21 @@
 <script setup lang="ts">
 import { Flex, Button, DatePicker } from 'ant-design-vue';
-import { computed, ref, watchEffect, Ref, watch } from 'vue';
+import { computed, ref, Ref, watch } from 'vue';
 import dayjs, { Dayjs } from 'dayjs';
-// import SavingsBarGraph from './SavingsBarGraph.vue';
-import useDeviceSavings from '../hooks/useDeviceSavings';
-import { DataItemType, SavingsChunk } from '../types';
+import SavingsBarGraph from './SavingsBarGraph.vue';
+// import useDeviceSavings from '../hooks/useDeviceSavings';
+import {
+	DataItemType,
+	SavingsChunk,
+	DeviceSavingsRequest,
+	DeviceSavingsResolution,
+} from '../types';
+
+import { useQuery } from '@tanstack/vue-query';
+import APIClient from '../services/api-client';
+import { DeviceSavingsResponse } from '../types';
+
+const apiClient = new APIClient<DeviceSavingsResponse>('/savings');
 
 interface Props {
 	deviceId: number;
@@ -18,16 +29,58 @@ const fromDate = ref<Dayjs>(toDate.value.subtract(30, 'day'));
 // Hardcoded values for testing
 toDate.value = dayjs(new Date('2023-12-31'));
 fromDate.value = dayjs(new Date('2023-01-01'));
+const resolution = ref<DeviceSavingsResolution>('month');
+
+// Create a reactive params object using computed
+const params: Ref<DeviceSavingsRequest> = computed(() => ({
+	to: toDate.value.toDate(),
+	from: fromDate.value.toDate(),
+	resolution: resolution.value,
+}));
+
+// TODO: Not working...
+// const {
+// 	data: deviceSavings,
+// 	isLoading,
+// 	isError,
+// 	error,
+// 	refetch,
+// } = useDeviceSavings(props.deviceId, params.value);
 
 const {
 	data: deviceSavings,
 	isLoading,
 	isError,
 	error,
-} = useDeviceSavings(props.deviceId, {
-	to: toDate.value.toDate(),
-	from: fromDate.value.toDate(),
+	refetch,
+} = useQuery({
+	queryKey: [
+		'savings',
+		props.deviceId,
+		toDate.value.toDate(),
+		fromDate.value.toDate(),
+		resolution.value,
+	],
+	queryFn: () => {
+		return apiClient.get(props.deviceId, {
+			params: {
+				to: toDate.value.toDate(),
+				from: fromDate.value.toDate(),
+				resolution: resolution.value,
+			},
+		});
+	},
 });
+
+watch(
+	params,
+	() => {
+		refetch();
+	},
+	{
+		deep: true, // ensures the watcher will trigger even for nested property changes
+	}
+);
 
 const roundToOneDecimal = (value: number): number => {
 	return Math.round(value * 10) / 10;
@@ -90,7 +143,7 @@ const timeScale = ref<string>('month');
 // Watch the deviceSavings for changes and update the arrays accordingly
 watch(
 	deviceSavings,
-	(newValue, _) => {
+	(newValue, oldValue) => {
 		if (newValue) {
 			processSavingsChunks(newValue.savingsChunks);
 		}
@@ -104,8 +157,11 @@ function processSavingsChunks(savingsChunks: SavingsChunk[]) {
 	const newTimeData: string[] = [];
 
 	for (const chunk of savingsChunks) {
-		newCarbonData.push(chunk.totalCarbon);
-		newDieselData.push(chunk.totalDiesel);
+		const { value } = calculateCarbonValue(
+			roundToOneDecimal(chunk.totalCarbon)
+		);
+		newCarbonData.push(value);
+		newDieselData.push(roundToOneDecimal(chunk.totalDiesel / 1000));
 		// Assuming 'from' is the start date of the month
 		newTimeData.push(dayjs(chunk.from).format('MMMM')); // Formats date as the month name
 	}
@@ -116,11 +172,11 @@ function processSavingsChunks(savingsChunks: SavingsChunk[]) {
 	timeData.value = newTimeData;
 }
 
-// const handleZoom = (event: any) => {
-// 	// Handle the zoom event
-// 	// Fetch new data based on the zoom level or perform other actions
-// 	console.log('Zoom event triggered', event);
-// };
+const handleZoom = (event: any) => {
+	// Handle the zoom event
+	// Fetch new data based on the zoom level or perform other actions
+	// console.log('Zoom event triggered', event);
+};
 
 const updateRangeToLast30Days = () => {
 	toDate.value = dayjs();
@@ -147,31 +203,30 @@ const updateToDate = (newDate: string | Dayjs) => {
 </script>
 
 <template>
-	<div v-if="isLoading">Loading...</div>
-	<div v-else-if="isError">Error: {{ error }}</div>
-	<div v-else>
-		<!-- {{ deviceSavings }} -->
-		<Flex gap="large" vertical>
-			<Flex justify="start" align="center" gap="middle">
-				<DatePicker
-					show-time
-					style="flex-grow: 1"
-					:value="fromDate"
-					@change="updateFromDate"
-				/>
-				<div style="font-weight: bold; font-size: x-large">-</div>
-				<DatePicker
-					show-time
-					style="flex-grow: 1"
-					:value="toDate"
-					@change="updateToDate"
-				/>
-			</Flex>
-			<Flex justify="start" align="center" gap="middle">
-				<Button @click="updateRangeToLast30Days">Last 30 Days</Button>
-				<Button @click="updateRangeToLast60Days">Last 60 Days</Button>
-				<Button @click="updateRangeToLastYear">Last year</Button>
-			</Flex>
+	<Flex gap="large" vertical>
+		<Flex justify="start" align="center" gap="middle">
+			<DatePicker
+				show-time
+				style="flex-grow: 1"
+				:value="fromDate"
+				@change="updateFromDate"
+			/>
+			<div style="font-weight: bold; font-size: x-large">-</div>
+			<DatePicker
+				show-time
+				style="flex-grow: 1"
+				:value="toDate"
+				@change="updateToDate"
+			/>
+		</Flex>
+		<Flex justify="start" align="center" gap="middle">
+			<Button @click="updateRangeToLast30Days">Last 30 Days</Button>
+			<Button @click="updateRangeToLast60Days">Last 60 Days</Button>
+			<Button @click="updateRangeToLastYear">Last year</Button>
+		</Flex>
+		<div v-if="isLoading">Loading...</div>
+		<div v-else-if="isError">Unable to retrieve the data in that range</div>
+		<div v-else>
 			<Flex justify="space-evenly" align="center" gap="large">
 				<DataItem :item="carbonItem" color="primary" />
 				<DataItem :item="dieselItem" color="secondary" />
@@ -188,8 +243,8 @@ const updateToDate = (newDate: string | Dayjs) => {
 					/>
 				</div>
 			</Flex>
-		</Flex>
-	</div>
+		</div>
+	</Flex>
 </template>
 
 <style scoped></style>
