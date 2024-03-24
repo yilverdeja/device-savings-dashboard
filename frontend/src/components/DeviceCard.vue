@@ -1,8 +1,16 @@
 <script setup lang="ts">
-import { AnchorLink, Card, Row, Col, TypographyText } from 'ant-design-vue';
+import {
+	AnchorLink,
+	Card,
+	Row,
+	Col,
+	TypographyText,
+	Flex,
+} from 'ant-design-vue';
 import { DeviceResponse } from '../types';
 import { computed } from 'vue';
 import { calculateCarbonValue, roundToOneDecimal } from '../utils/helpers';
+import { EnvironmentOutlined } from '@ant-design/icons-vue';
 
 interface Props {
 	device: DeviceResponse;
@@ -28,10 +36,18 @@ const carbonItem = computed(() => {
 					</Col>
 					<Col class="gutter-row" :span="12">
 						<TypographyText strong>Total Diesel</TypographyText>
-						<p>{{ roundToOneDecimal(device.totalDiesel) }} Litre</p>
+						<p>
+							{{ roundToOneDecimal(device.totalDiesel) }} Litres
+						</p>
 					</Col>
 				</Row>
 			</div>
+			<Flex justify="start" align="center" gap="small">
+				<EnvironmentOutlined style="color: darkcyan" />
+				<TypographyText style="color: darkcyan">{{
+					device.timezone
+				}}</TypographyText>
+			</Flex>
 		</Card>
 	</AnchorLink>
 </template>
