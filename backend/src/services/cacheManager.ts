@@ -7,13 +7,13 @@ const memoryCache = caching('memory', {
 
 export default {
 	async get<T>(key: string): Promise<T | null> {
-		const value = (await memoryCache).get(key);
+		const value = await (await memoryCache).get(key);
 		return value === undefined ? null : (value as T);
 	},
 	async set(key: string, value: any, ttl: number): Promise<void> {
-		return (await memoryCache).set(key, value, ttl);
+		return await (await memoryCache).set(key, value, ttl);
 	},
 	async del(keys: string): Promise<void> {
-		return (await memoryCache).del(keys);
+		return await (await memoryCache).del(keys);
 	},
 };
