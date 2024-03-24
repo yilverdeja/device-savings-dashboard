@@ -185,3 +185,87 @@ Selecting the `Last 30 Days`, `Last 60 Days` or `Last Year` buttons will update 
 In addition, I've added a `Month`, `Week` and `Day` selector to choose the resolution of the data retrieved. If it's set to month, the date range will be split into monthly chunks. If weeks then weekly chunks, and day into daily chunks. The graph will update accordingly.
 
 The graph can be zoomed in and out, but it will not change the resolution of the data shown.
+
+## Notes & Known Issues
+
+### Inconsistent Testing
+
+-   **Issue**: The testing implemented throughout the codebase is inconsistent.
+-   **Impact**: This inconsistency has led to bugs which required time to fix.
+-   **Future Consideration**: Invest time in Test Driven Development (TDD) practices to streamline debugging and ensure reliability.
+
+### Hardcoded Values
+
+-   **Issue**: The frontend has the starting date range hardcoded to January-December 2023.
+-   **Impact**: This limits the flexibility of date range selection.
+-   **Future Consideration**: Add `lastUpdated` to each device in `/devices` and set the starting `to` date to this value on modal open.
+
+### Range Validations
+
+-   **Issue**: The frontend lacks validations for the date range input.
+-   **Impact**: Invalid date ranges can cause server errors.
+-   **Future Consideration**: Introduce client-side validation to improve user experience and reduce invalid server requests.
+
+### Separation of Concerns
+
+-   **Issue**: `dataService` and `savingsService` are singletons, leading to poor separation of concerns.
+-   **Impact**: This design complicates the codebase and may introduce tight coupling.
+-   **Future Consideration**: Refactor the services to better adhere to the separation of concerns principle.
+
+### useDeviceSavings
+
+-   **Issue**: The `useDeviceSavings` hook is currently not in use due to query issues.
+-   **Impact**: The logic is directly integrated into components, which is not ideal.
+-   **Future Consideration**: Debug and reimplement `useDeviceSavings` as intended for better maintainability.
+
+### Vue3 Composition API vs React
+
+-   **Issue**: The frontend's Vue3 code resembles React, contributing to bugs.
+-   **Impact**: The learning curve of Vue3's Composition API affected code quality.
+-   **Future Consideration**: Refactor the code to align more with Vue3 best practices.
+
+### Ant Design
+
+-   **Issue**: First-time use of Ant Design resulted in some dissatisfaction.
+-   **Impact**: Preference for TailwindCSS due to personal comfort and experience.
+-   **Future Consideration**: Consider using TailwindCSS or another easier to customize UI framework for future projects for improved productivity.
+
+### Timestamps
+
+#### No Device Timestamp Usage
+
+-   **Issue**: Assumed immediate data retrieval, neglecting `device_timestamp` value in device savings data.
+-   **Impact**: Simplifies project scope but may not represent realistic data flow.
+-   **Future Consideration**: Incorporate device timestamps for accuracy.
+
+#### No Timezone Adjustments
+
+-   **Issue**: Ignored timezone differences between user and device data.
+-   **Impact**: Data representation may not accurately reflect the device's timezone.
+-   **Future Consideration**: Implement timezone adjustments for device data.
+
+## Improvements
+
+### Testing
+
+**Idea**: Expand test coverage to include `savingsController`, services, and other critical components.
+
+### Get Devices
+
+**Idea**: Enhance device retrieval functionality by allowing searches by device names, assuming uniqueness.
+
+### GET Savings API & Graph
+
+**Ideas**:
+
+-   Implement re-fetching of data upon zoom for real-time accuracy, though mindful of potential performance issues.
+-   Consider front-end aggregation of day-resolution data to avoid excessive server load.
+-   Optimize data delivery by fetching larger resolutions first, followed by background fetching of granular data.
+
+### Types
+
+**Idea**: Refine the usage of TypeScript by organizing and standardizing `Types` and `Interfaces` for better code clarity.
+
+### Set Server Port
+
+Right now, the server port is hardcoded into the `index.ts` backend file, and the `services/api-client.ts` frontend file. When updating a port in the backend file, the frontend file reference has to be updated too which can result in issues.
