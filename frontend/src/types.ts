@@ -31,8 +31,6 @@ export interface DeviceSavingsResponse {
 	device_id: number;
 	totalCarbon: number;
 	totalDiesel: number;
-	// averageCarbon: number;
-	// averageDiesel: number;
 	savingsChunks: SavingsChunk[];
 }
 

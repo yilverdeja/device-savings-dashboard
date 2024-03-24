@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { Flex, Button, DatePicker } from 'ant-design-vue';
-import { computed, ref, watchEffect, Ref } from 'vue';
+import { computed, ref, watchEffect, Ref, watch } from 'vue';
 import dayjs, { Dayjs } from 'dayjs';
 // import SavingsBarGraph from './SavingsBarGraph.vue';
 import useDeviceSavings from '../hooks/useDeviceSavings';
-import { DataItemType } from '../types';
+import { DataItemType, SavingsChunk } from '../types';
 
 interface Props {
 	deviceId: number;
@@ -16,8 +16,8 @@ const toDate = ref<Dayjs>(dayjs());
 const fromDate = ref<Dayjs>(toDate.value.subtract(30, 'day'));
 
 // Hardcoded values for testing
-toDate.value = dayjs(new Date('2023-12-01'));
-fromDate.value = dayjs(new Date('2023-11-29'));
+toDate.value = dayjs(new Date('2023-12-31'));
+fromDate.value = dayjs(new Date('2023-01-01'));
 
 const {
 	data: deviceSavings,
@@ -82,29 +82,39 @@ const dieselItem = computed(() => {
 	} as DataItemType;
 });
 
-// const carbonData = ref<number[]>([
-// 	/* ... */
-// ]);
-// const dieselData = ref<number[]>([
-// 	/* ... */
-// ]);
-// const timeData = ref<string[]>([
-// 	/* ... */
-// ]);
-// const timeScale = ref<string>('month-year');
+const carbonData = ref<number[]>([]);
+const dieselData = ref<number[]>([]);
+const timeData = ref<string[]>([]);
+const timeScale = ref<string>('month');
 
-// const carbonData = ref([1200, 1320, 1010, 1340, 900, 2300, 2100]);
-// const dieselData = ref([2200, 1820, 1910, 2340, 2900, 3300, 3100]);
-// const timeData = ref([
-// 	'January',
-// 	'February',
-// 	'March',
-// 	'April',
-// 	'May',
-// 	'June',
-// 	'July',
-// ]);
-// const timeScale = ref('Monthly');
+// Watch the deviceSavings for changes and update the arrays accordingly
+watch(
+	deviceSavings,
+	(newValue, _) => {
+		if (newValue) {
+			processSavingsChunks(newValue.savingsChunks);
+		}
+	},
+	{ immediate: true }
+);
+
+function processSavingsChunks(savingsChunks: SavingsChunk[]) {
+	const newCarbonData: number[] = [];
+	const newDieselData: number[] = [];
+	const newTimeData: string[] = [];
+
+	for (const chunk of savingsChunks) {
+		newCarbonData.push(chunk.totalCarbon);
+		newDieselData.push(chunk.totalDiesel);
+		// Assuming 'from' is the start date of the month
+		newTimeData.push(dayjs(chunk.from).format('MMMM')); // Formats date as the month name
+	}
+
+	// Update the reactive references with the new data
+	carbonData.value = newCarbonData;
+	dieselData.value = newDieselData;
+	timeData.value = newTimeData;
+}
 
 // const handleZoom = (event: any) => {
 // 	// Handle the zoom event
@@ -166,16 +176,18 @@ const updateToDate = (newDate: string | Dayjs) => {
 				<DataItem :item="carbonItem" color="primary" />
 				<DataItem :item="dieselItem" color="secondary" />
 			</Flex>
-			<div style="width: 600px; height: 400px">
-				{{ deviceSavings }}
-				<!-- <SavingsBarGraph
-					:carbonData="carbonData"
-					:dieselData="dieselData"
-					:timeData="timeData"
-					:timeScale="timeScale"
-					@zoom="handleZoom"
-				/> -->
-			</div>
+			<Flex justify="center" align="center">
+				<div style="width: 600px; height: 400px">
+					<!-- {{ deviceSavings }} -->
+					<SavingsBarGraph
+						:carbonData="carbonData"
+						:dieselData="dieselData"
+						:timeData="timeData"
+						:timeScale="timeScale"
+						@zoom="handleZoom"
+					/>
+				</div>
+			</Flex>
 		</Flex>
 	</div>
 </template>

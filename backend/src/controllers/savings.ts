@@ -78,8 +78,6 @@ const deviceSavingsRetrievalController =
 			const { totalCarbon, totalDiesel } =
 				savingsService.calculateTotalSavedInRange(id, fromDate, toDate);
 
-			console.log(totalCarbon, totalDiesel, fromDate, toDate);
-
 			// get total energy savings per chunk range
 			const data = dateChunks.map((chunk) => {
 				const chunkTotal = savingsService.calculateTotalSavedInRange(

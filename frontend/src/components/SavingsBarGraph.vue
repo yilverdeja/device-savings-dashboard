@@ -79,12 +79,12 @@ const createChartOptions = () => {
 		yAxis: [
 			{
 				type: 'value',
-				name: 'Carbon Savings',
+				name: 'kgs',
 				position: 'left',
 			},
 			{
 				type: 'value',
-				name: 'Diesel Savings',
+				name: 'litres',
 				position: 'right',
 			},
 		],
