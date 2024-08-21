@@ -12,8 +12,6 @@ declare module 'vue' {
     DetailedDataView: typeof import('./src/components/DetailedDataView.vue')['default']
     DeviceCard: typeof import('./src/components/DeviceCard.vue')['default']
     DeviceModal: typeof import('./src/components/DeviceModal.vue')['default']
-    Graph: typeof import('./src/components/Graph.vue')['default']
-    HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
     SavingsBarGraph: typeof import('./src/components/SavingsBarGraph.vue')['default']
   }
 }

@@ -13,15 +13,15 @@ Developing a dashboard to retrieve energy savings information from specific devi
 
 #### Backend
 
--   Typescript
--   Node
--   Express
+- Typescript
+- Node
+- Express
 
 #### Frontend
 
--   Typescript
--   Vue
--   AntDesign: UI
+- Typescript
+- Vue
+- AntDesign: UI
 
 ## Getting Started
 
@@ -33,8 +33,8 @@ This project has only been tested on Node Versions `18.19.0` and `20.11.0`. Plea
 
 On the root folder, install all the NPM packages with the following command.
 
-```sh
-npm run install
+```bash
+npm run setup
 ```
 
 This will install the NPM packages on the root directory, the frontend directory and the backend directory.
@@ -47,8 +47,8 @@ After installing the NPM packages, start the backend server on port `5000` and t
 
 In the project directory, you can run both the server and client concurrently using:
 
-```sh
-npm start
+```bash
+npm run start
 ```
 
 This will start a node server on port `5000`, and a web server on an availale port.
@@ -57,8 +57,8 @@ This will start a node server on port `5000`, and a web server on an availale po
 
 In the backend directory, run the node server using:
 
-```sh
-npm start
+```bash
+npm run server
 ```
 
 This will start a node server on port `5000`
@@ -67,7 +67,7 @@ This will start a node server on port `5000`
 
 In the frontend directory, run the web server using:
 
-```sh
+```bash
 npm run dev
 ```
 
@@ -86,7 +86,7 @@ Retrieves a list of devices, with the option to include related savings informat
 
 #### Request Parameters
 
--   `includeSavings` (boolean, optional): If set to `true`, the response will include savings information for each device.
+- `includeSavings` (boolean, optional): If set to `true`, the response will include savings information for each device.
 
 #### Response Parameters
 
@@ -94,16 +94,16 @@ The response includes an array of devices, optionally augmented with savings inf
 
 Each device has the following parameters of the following types:
 
--   `id`: number
--   `name`: string
--   `timezone`: string
+- `id`: number
+- `name`: string
+- `timezone`: string
 
 The following are the optional parameters if `includeSavings` is set to true
 
--   `totalCarbon`: number
--   `totalDiesel`: number
--   `averageCarbon`: number
--   `averageDiesel`: number
+- `totalCarbon`: number
+- `totalDiesel`: number
+- `averageCarbon`: number
+- `averageDiesel`: number
 
 ### Get Savings Over a Date Range
 
@@ -114,25 +114,25 @@ Retrieves a list of saving data of a specific device.
 
 #### Request Parameters
 
--   `from` (optional): The start date for the savings data. Must be a string in an ISO format.
--   `to` (optional): The end date for the savings data. Must be a string in an ISO format.
--   `resolution` (optional): The resolution of the savings data (month, week, or day).
+- `from` (optional): The start date for the savings data. Must be a string in an ISO format.
+- `to` (optional): The end date for the savings data. Must be a string in an ISO format.
+- `resolution` (optional): The resolution of the savings data (month, week, or day).
 
 #### Response Parameters
 
 The response includes savings data chunks for the specified date range and resolution.
 
--   `device_id`: number
--   `totalCarbon`: number
--   `totalDiesel`: number
--   `savingsChunks`: SavingsChunk[]
+- `device_id`: number
+- `totalCarbon`: number
+- `totalDiesel`: number
+- `savingsChunks`: SavingsChunk[]
 
 SavingsChunk is shaped below:
 
--   `from`: Date;
--   `to`: Date;
--   `totalCarbon`: number;
--   `totalDiesel`: number;
+- `from`: Date;
+- `to`: Date;
+- `totalCarbon`: number;
+- `totalDiesel`: number;
 
 ### Error Response
 
@@ -140,23 +140,23 @@ Both endpoints will return an error response in the case of a failure, such as w
 
 The error response is structured below:
 
--   `statusCode`: number;
--   `error`: string;
--   `message`: string;
--   `details` (optional): any;
+- `statusCode`: number;
+- `error`: string;
+- `message`: string;
+- `details` (optional): any;
 
 ### Endpoint Tests
 
 When the server starts, you can start retrieving data from it after seeing the `CSV data loaded successfully` message on the server console. Attempting to retrieve data from it will return an internal server error JSON that the data hasn't loaded.
 
--   `curl "http://localhost:5000/devices"`
-    -   returns a list of devices each with device_id, name, and timezone info
--   `curl "http://localhost:5000/devices?includeSavings=true"`
-    -   returns same as above but with totalCarbon, averageCarbon, totalDiesel and averageDiesel info
--   `curl "http://localhost:5000/savings/:device_id"`
-    -   `device_id` is an available device_id on that can be found on `/devices`
-    -   returns the device_id, with the totalCarbon and totalDiesel in it's lifespan. In addition, with a default of Jan to Dec 2023 at a monthly resolution, it should return an array of 12 chunks
-    -   each chunk has the from date, the to date, the totalCarbon saved and the totalDiesel saved
+- `curl "http://localhost:5000/devices"`
+  - returns a list of devices each with device_id, name, and timezone info
+- `curl "http://localhost:5000/devices?includeSavings=true"`
+  - returns same as above but with totalCarbon, averageCarbon, totalDiesel and averageDiesel info
+- `curl "http://localhost:5000/savings/:device_id"`
+  - `device_id` is an available device_id on that can be found on `/devices`
+  - returns the device_id, with the totalCarbon and totalDiesel in it's lifespan. In addition, with a default of Jan to Dec 2023 at a monthly resolution, it should return an array of 12 chunks
+  - each chunk has the from date, the to date, the totalCarbon saved and the totalDiesel saved
 
 ## Frontend - UI
 
@@ -190,59 +190,59 @@ The graph can be zoomed in and out, but it will not change the resolution of the
 
 ### Inconsistent Testing
 
--   **Issue**: The testing implemented throughout the codebase is inconsistent.
--   **Impact**: This inconsistency has led to bugs which required time to fix.
--   **Future Consideration**: Invest time in Test Driven Development (TDD) practices to streamline debugging and ensure reliability.
+- **Issue**: The testing implemented throughout the codebase is inconsistent.
+- **Impact**: This inconsistency has led to bugs which required time to fix.
+- **Future Consideration**: Invest time in Test Driven Development (TDD) practices to streamline debugging and ensure reliability.
 
 ### Hardcoded Values
 
--   **Issue**: The frontend has the starting date range hardcoded to January-December 2023.
--   **Impact**: This limits the flexibility of date range selection.
--   **Future Consideration**: Add `lastUpdated` to each device in `/devices` and set the starting `to` date to this value on modal open.
+- **Issue**: The frontend has the starting date range hardcoded to January-December 2023.
+- **Impact**: This limits the flexibility of date range selection.
+- **Future Consideration**: Add `lastUpdated` to each device in `/devices` and set the starting `to` date to this value on modal open.
 
 ### Range Validations
 
--   **Issue**: The frontend lacks validations for the date range input.
--   **Impact**: Invalid date ranges can cause server errors.
--   **Future Consideration**: Introduce client-side validation to improve user experience and reduce invalid server requests.
+- **Issue**: The frontend lacks validations for the date range input.
+- **Impact**: Invalid date ranges can cause server errors.
+- **Future Consideration**: Introduce client-side validation to improve user experience and reduce invalid server requests.
 
 ### Separation of Concerns
 
--   **Issue**: `dataService` and `savingsService` are singletons, leading to poor separation of concerns.
--   **Impact**: This design complicates the codebase and may introduce tight coupling.
--   **Future Consideration**: Refactor the services to better adhere to the separation of concerns principle.
+- **Issue**: `dataService` and `savingsService` are singletons, leading to poor separation of concerns.
+- **Impact**: This design complicates the codebase and may introduce tight coupling.
+- **Future Consideration**: Refactor the services to better adhere to the separation of concerns principle.
 
 ### useDeviceSavings
 
--   **Issue**: The `useDeviceSavings` hook is currently not in use due to query issues.
--   **Impact**: The logic is directly integrated into components, which is not ideal.
--   **Future Consideration**: Debug and reimplement `useDeviceSavings` as intended for better maintainability.
+- **Issue**: The `useDeviceSavings` hook is currently not in use due to query issues.
+- **Impact**: The logic is directly integrated into components, which is not ideal.
+- **Future Consideration**: Debug and reimplement `useDeviceSavings` as intended for better maintainability.
 
 ### Vue3 Composition API vs React
 
--   **Issue**: The frontend's Vue3 code resembles React, contributing to bugs.
--   **Impact**: The learning curve of Vue3's Composition API affected code quality.
--   **Future Consideration**: Refactor the code to align more with Vue3 best practices.
+- **Issue**: The frontend's Vue3 code resembles React, contributing to bugs.
+- **Impact**: The learning curve of Vue3's Composition API affected code quality.
+- **Future Consideration**: Refactor the code to align more with Vue3 best practices.
 
 ### Ant Design
 
--   **Issue**: First-time use of Ant Design resulted in some dissatisfaction.
--   **Impact**: Preference for TailwindCSS due to personal comfort and experience.
--   **Future Consideration**: Consider using TailwindCSS or another easier to customize UI framework for future projects for improved productivity.
+- **Issue**: First-time use of Ant Design resulted in some dissatisfaction.
+- **Impact**: Preference for TailwindCSS due to personal comfort and experience.
+- **Future Consideration**: Consider using TailwindCSS or another easier to customize UI framework for future projects for improved productivity.
 
 ### Timestamps
 
 #### No Device Timestamp Usage
 
--   **Issue**: Assumed immediate data retrieval, neglecting `device_timestamp` value in device savings data.
--   **Impact**: Simplifies project scope but may not represent realistic data flow.
--   **Future Consideration**: Incorporate device timestamps for accuracy.
+- **Issue**: Assumed immediate data retrieval, neglecting `device_timestamp` value in device savings data.
+- **Impact**: Simplifies project scope but may not represent realistic data flow.
+- **Future Consideration**: Incorporate device timestamps for accuracy.
 
 #### No Timezone Adjustments
 
--   **Issue**: Ignored timezone differences between user and device data.
--   **Impact**: Data representation may not accurately reflect the device's timezone.
--   **Future Consideration**: Implement timezone adjustments for device data.
+- **Issue**: Ignored timezone differences between user and device data.
+- **Impact**: Data representation may not accurately reflect the device's timezone.
+- **Future Consideration**: Implement timezone adjustments for device data.
 
 ## Improvements
 
@@ -258,9 +258,9 @@ The graph can be zoomed in and out, but it will not change the resolution of the
 
 **Ideas**:
 
--   Implement re-fetching of data upon zoom for real-time accuracy, though mindful of potential performance issues.
--   Consider front-end aggregation of day-resolution data to avoid excessive server load.
--   Optimize data delivery by fetching larger resolutions first, followed by background fetching of granular data.
+- Implement re-fetching of data upon zoom for real-time accuracy, though mindful of potential performance issues.
+- Consider front-end aggregation of day-resolution data to avoid excessive server load.
+- Optimize data delivery by fetching larger resolutions first, followed by background fetching of granular data.
 
 ### Types
 
