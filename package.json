@@ -1,16 +1,16 @@
 {
-  "name": "energy-device-management",
-  "version": "1.0.0",
-  "description": "A dashboard to retrieve energy savings information from specific devices",
+  "name": "nuxt-app",
+  "private": true,
+  "type": "module",
   "scripts": {
-    "setup": "npm install && cd frontend && npm install && cd ../backend && npm install",
-    "start": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "cd backend && npm start",
-    "client": "cd frontend && npm run dev"
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
   },
-  "author": "Yil Verdeja",
-  "license": "ISC",
-  "devDependencies": {
-    "concurrently": "^8.2.2"
+  "dependencies": {
+    "nuxt": "^3.12.4",
+    "vue": "latest"
   }
 }
